@@ -1,4 +1,6 @@
--cp src
+-cp src/main/haxe
+-lib stx
+-lib tink_runloop
 -D analyzer-optimize
 -main Main
 --interp
