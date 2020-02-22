@@ -27,36 +27,30 @@ class Alt extends TaskBase{
     this.arr = [];
   }
   override public function doPerform(){
-    switch(this.state){
-      case Pending:
-        if(arr.length == 0){
+    if(arr.length == 0){
+      switch(gen()){
+        case Some(v) : 
+          arr.push(v);
+          owner.work(v);
+        case None:
+          this.recurring = false;
+      }
+    }else{
+      var last = arr[arr.length-1];
+      switch (last.state){
+        case Pending: 
+          owner.work(last);
+        case Performed:
+          this.recurring = false;
+        case Canceled:
           switch(gen()){
-            case Some(v) : 
+            case Some(v):
               arr.push(v);
-              owner.work(v);
             case None:
               this.recurring = false;
           }
-        }else{
-          var last = arr[arr.length-1];
-          switch (last.state){
-            case Pending: 
-              owner.work(last);
-            case Performed:
-              this.recurring = false;
-            case Canceled:
-              switch(gen()){
-                case Some(v):
-                  arr.push(v);
-                  owner.work(v);
-                case None:
-                  this.recurring = false;
-                  this.cancel();
-              }
-            default:
-          }
-        }
-      default:
+        default:
+      }
     }
   }
 }

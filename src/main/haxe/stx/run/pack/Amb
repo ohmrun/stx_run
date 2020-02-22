@@ -6,10 +6,10 @@ class Amb extends TaskBase{
     return RunLoop.current;
   }
   var gen   : Void->Option<Task>;
-  var arr   : StdArray<Task>;
+  var arr   : StdArray<TaskObject>;
   var init  : Bool;
 
-  public function new(gen){
+  public function new(gen:Void->Option<Task>){
     this.gen  = gen;
     this.arr  = [];
     this.init = false;

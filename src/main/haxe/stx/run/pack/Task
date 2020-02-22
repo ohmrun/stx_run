@@ -1,0 +1,17 @@
+package stx.runloop.pack;
+
+@:forward abstract Task(TaskBase) from TaskBase to TaskBase{
+  public static var NOOP(default,null) : Task = new Task(new TaskBase(false));
+  public function new(self){
+    this = self;
+  }
+  //@:from static public function fromTinkTask(tsk:tink.runloop.Task):Task{
+   // return new Task(new TinkDelegate(tsk));
+  //}
+  @:to public function toTinkTask():tink.runloop.Task{
+    return this;
+  }
+  public function then(that:Task):Task{
+    return new Seq([this,that].toIter().toGenerator());
+  }
+}

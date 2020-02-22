@@ -1,7 +1,8 @@
-import stx.runloop.Package;
+
+import stx.run.Package;
 
 class Main {
 	static function main() {
-		trace("Hello, worlds!");
+
 	}
 }

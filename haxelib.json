@@ -1,0 +1,25 @@
+{
+    "name": "stx_run",
+    "license": "MIT",
+    "tags": [
+        "cross",
+        "functional"
+    ],
+    "description": "Functional composition tools. Haxe 3.1.* required.",
+    "contributors": [
+        "0b1kn00b"
+    ],
+    "releasenote": "Wow, can post past version. oops",
+    "version": "0.0.1",
+    "url": "https://github.com/0b1kn00b/stx_run",
+    "dependencies": {
+        "tink_core": "",
+        "tink_concurrent" : "",
+        "stx_core": "",
+        "stx_fn": "",
+        "stx_log": "",
+        "stx_parse": "",
+        "stx_proxy": ""
+    },
+    "classPath": "src/main/haxe"
+}

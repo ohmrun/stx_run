@@ -1,0 +1,23 @@
+package stx.runloop.pack;
+
+class TinkDelegate extends TaskBase{
+  var delegate : tink.runloop.Task;
+  public function new(delegate){
+    this.delegate = delegate;
+    super(false);
+  }
+  override function get_recurring(){
+    return this.delegate.recurring;
+  }
+  override function get_state(){
+    return this.delegate.state;
+  }
+  override public function cancel():Void{
+    this.delegate.cancel();
+  }
+  override public function perform():Void{
+    __.log().trace({delegate:true,state:this.delegate.state});
+    this.delegate.perform();
+    __.log().trace({after:true,delegate:this.delegate,state:this.delegate.state});
+  }
+}

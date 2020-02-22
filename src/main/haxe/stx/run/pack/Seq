@@ -1,0 +1,64 @@
+package stx.runloop.pack;
+
+  
+class Seq extends TaskBase{
+  var owner(get,null) : RunLoop;
+  function get_owner(){
+    return RunLoop.current;
+  }
+  var gen : Void->Option<Task>;
+  var arr : StdArray<TaskObject>;
+
+  public function new(gen){
+    this.gen = gen;
+    this.arr = [];
+    super(true);
+  }
+
+  override public function doPerform(){
+    //__.log().trace('Seq: ${this.state}');
+    if(arr.length == 0){
+      switch(gen()){
+        case Some(v) : 
+          push(v);
+        case None:
+          this.recurring = false;
+          return;
+      }
+    }
+    var last = arr[arr.length-1];
+    //__.log().trace({after:false,index:arr.length-1,state:last.state});
+    switch (last.state){
+      case Pending: 
+        last = arr[arr.length-1] = owner.work(last);
+        //__.log().trace({after:true,index:arr.length-1,state:last.state});
+      case Canceled:
+        this.cancel();
+      case Performed:
+        switch(gen()){
+          case Some(v):
+            push(v);
+          case None:
+            this.recurring = false;
+        }
+      default:
+    }
+  }
+  function push(v){
+    //__.log().trace(v);
+    this.arr.push(v);
+  }
+  override public function doCancel(){
+    arr.iter(
+      (x) -> {
+        if(x.state != Canceled && x.state != Performed){
+          x.cancel();
+        }
+      }
+    );
+  }
+  override public function doCleanup(){
+    this.gen = () -> None;
+    this.arr = [];
+  }
+}
