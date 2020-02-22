@@ -1,7 +1,6 @@
 package stx.run.body;
 
 import stx.run.head.data.UIO in UIOT;
-import stx.run.head.data.Automation in AutomationT;
 
 @:noUsing class Automations extends Clazz{
   public function seq(fn:JobQueue->Automation,thiz:Automation):Automation{

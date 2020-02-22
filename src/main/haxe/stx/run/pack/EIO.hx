@@ -45,7 +45,7 @@ import stx.run.head.data.EIO in EIOT;
     return this;
   }
   public function crunch(){
-    return Receiver.lift(this(Automation.unit()))(
+    return Receiver.lift(this(__))(
       opt -> switch(opt){
         case Some(v) : throw(v);
         default      : 

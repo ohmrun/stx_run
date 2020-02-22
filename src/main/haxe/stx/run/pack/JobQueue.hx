@@ -13,7 +13,7 @@ import stx.run.head.data.JobQueue in JobQueueT;
   private function get_self():JobQueue return lift(this);
 
   public function automation():Automation{
-    return Automation.lift(Ended(Val(self)));
+    return Automation.lift(Release(self));
   }
   public function concat(that:JobQueue):JobQueue{
     return lift(this.concat(that.prj()));

@@ -1,5 +1,5 @@
 package stx.run.head;
-import stx.run.head.data.Automation in AutomationT;
+import stx.run.pack.automation.TypeDef head.data.Automation in AutomationT;
 
 class Automations{
   static public var _(default,null) = new stx.run.body.Automations();
