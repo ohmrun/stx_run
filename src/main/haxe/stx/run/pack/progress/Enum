@@ -1,0 +1,13 @@
+package stx.run.pack.progress;
+
+enum Progess{
+  Pending;
+
+  Unknown;
+
+  Polling(float:Float);//thread
+  Waiting(cb:Reactor<Noise>);//event
+  Problem(e:TypedError<AutomationFailure<Dynamic>>);
+
+  Already;
+}

@@ -1,70 +1,87 @@
 package stx.run.pack.automation;
 
 class Destructure{
-  private function new(){}
-  public function seq(fn:JobQueue->Automation,self:Automation):Automation{
+  var log = __.log().trace;
+  private function new(){
+
+  }
+  public function seq(fn:Queue->Automation,self:Automation):Automation{
+    var f = seq.bind(fn);
     return switch self {
-      case Interim(v: Receiver<Chomp<R,E>>);//event architecture
-      case Operate(ch: Unary<Op,Chomp<R,E>>);//thread architecture
-      case Release(v:R);//completion
-      case Default(e:TypedError<E>);//error
+      case Interim(rcv)           : Interim(rcv.map(f));
+      case Operate(f1)            : Operate(f1.mod(f));
+      case Release(r)             : fn(r);
+      case Default(e)             : Default(e);
     }
-    return Proxies.fmap(
-      self.prj(),
-      fn.broker(
-        (F) -> 
-          F.then(__.arw().fn())
-            .then( 
-              (_:Arrowlet<JobQueue,Automation>) -> _.postfix(x -> x.prj()) 
-            )
-      )
-    ).broker(
-      (F) -> F.then(Automation.lift)
+  }
+  public function mod(fn:Queue -> Queue, self:Automation){
+    return seq(fn.fn().then(Release),self);
+  }
+  public function concat(that:Automation,self:Automation):Automation{
+    return seq(
+      (jobs0) -> that.mod(
+        (jobs1) -> jobs0.concat(jobs1)
+      ),
+      self
     );
   }
-  public inline function cons(that:Automation,self:Automation):Automation{
+  public function cons(task:Task,self:Automation):Automation{
+    return mod(
+      (jobs) -> jobs.cons(task),
+      self
+    );
+  }
+  public function snoc(task:Task,self:Automation):Automation{
+    return mod(
+      (jobs) -> jobs.cons(task)
+    ,self);
+  }
+  function operate(self:Automation,push:((Void->Void) -> Void),?limit:Limit){
+    var profile = Profile.conf(limit);
     
-  public inline function concat(that:Automation,self:Automation):Automation{
-    return self.fmap(
-      (jobs0) -> that.map(
-        (jobs1) -> Release(jobs0.concat(jobs1))
-      )
-    );
-  }
-  public inline function snoc(task:Task,lhs:Automation):Automation{
-    return Automation.lift(Proxies.fmap(
-      lhs.prj(),
-      (l_jobs:JobQueue) -> Release(l_jobs.snoc(task))
-    ));
-  }
-  function operate(self:Automation,push:(Void->Void) -> Void){
-    function cookie_monster(self:AutomationT){
-      //trace('cookie');
+    function cookie_monster(self:Automation){
       switch(self){
         case Interim(ft)          : 
           push(() -> {
-            var res = ft(cookie_monster);
-            submit(res);
+            ft(Noise,cookie_monster);
           });
-        case Operate(next)   : 
+        case Operate(next)        : 
           push(
-            () -> { cookie_monster(next()); }
+            () -> { cookie_monster(next(Pursue)); }
           );
-        case Default(e)         : throw e;
+        case Release(_.is_defined() => false)        : 
+        case Release(jobs)        : 
+          jobs.operate(push,limit);
+        case Default(e)           : throw e;
       }
     }
     push(cookie_monster.bind(self));    
   }
-  public function submit(self:Automation){
+
+  inline function sync(thk){
+    thk();
+  }
+  inline function async(thk){
+    MainLoop.add(thk);
+  }
+  /**
+    Submit the Automation to the MainLoop;
+  **/
+  public function submit(self:Automation,?limit){
     operate(
       self,
-      (thk) -> MainLoop.add(thk)
+      async,
+      limit
     );
   }
-  public function crunch(self:Automation){
+  /**
+    Run the Automation inline;
+  **/
+  public function crunch(self:Automation,?limit){
     operate(
       self,
-      (thk) -> thk()
+      sync,
+      limit
     );
   }  
-}
+}   

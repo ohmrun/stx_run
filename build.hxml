@@ -4,12 +4,14 @@
 -lib tink_concurrent
 -lib utest
 
--lib stx_arrowlet
+
+
 -lib stx_core
 -lib stx_fn
 -lib stx_log
--lib stx_proxy
+-lib stx_fp
 
+-lib min-max
 -lib stx_parse
 
 
@@ -17,6 +19,7 @@
 -D test
 
 -main Main
+--interp
 
--hl build.hl
+#-hl build.hl
 

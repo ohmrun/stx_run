@@ -1,43 +1,70 @@
 package stx.run.pack;
 
-import stx.run.head.data.Receiver in ReceiverT;
-import stx.run.head.data.Waiter   in WaiterT;
+import stx.run.pack.receiver.Typedef in ReceiverT;
+import stx.run.pack.waiter.Typedef   in WaiterT;
 
-abstract Waiter<R,E>(WaiterT<R,E>){
+@:callable abstract Waiter<R,E>(WaiterT<R,E>){
   public function new(self) this = self;
-  @:noUsing static inline public function lift<R,E>(v:WaiterT<R,E>) return new Waiter(v);
+  static public var inj(default,null) = new Constructor();
+
+
+  @:noUsing static inline public function lift<R,E>(v:WaiterT<R,E>)                   return inj.lift(v);  
+  @:noUsing static inline public function fromOutcome<R,E>(chk:Outcome<R,E>):Waiter<R,E>  return inj.fromOutcome(chk);
+  @:noUsing static inline public function fromOutcomeReceiver<R,E>(rcv:ReceiverT<Outcome<R,E>>):Waiter<R,E> return inj.fromOutcomeReceiver(rcv);
   
-  @:noUsing static inline public function fromChunk<R,E>(chk:Chunk<R,E>):Waiter<R,E>{
-    return lift((cb:Chunk<R,E>->Void) -> {
+  public function map<U>(fn:R->U):Waiter<U,E>                                             return inj._.map(fn,self);
+  public function fmap<U>(fn:R->Waiter<U,E>):Waiter<U,E>                                  return inj._.fmap(fn,self);
+  public function fold<Z>(val:R->Z,err:Null<TypedError<E>>->Z):Receiver<Z>                return inj._.fold(val,err,self);
+  public function errata<E0>(fn:TypedError<E>->TypedError<E0>):Waiter<R,E0>               return inj._.errata(fn,self);
+
+  public inline function prj():WaiterT<R,E> return this;
+  private var self(get,never):Waiter<R,E>;
+  private function get_self():Waiter<R,E> return lift(this);
+}
+private class Constructor{
+  public var _(default,null) = new Destructure();
+  public function new(){}
+  public function lift<R,E>(v:WaiterT<R,E>) return new Waiter(v);
+  public function fromOutcome<R,E>(chk:Outcome<R,E>):Waiter<R,E>{
+    __.log().close().trace('fromOutcome');
+    return lift((cb:Outcome<R,E>->Void) -> {
+      __.log().close().trace('inside');
       //return __.run().task(cb.bind(chk));TODO
       cb(chk);
       return Automation.unit();
     });
   }
-  @:noUsing static inline public function fromChunkReceiver<R,E>(rcv:ReceiverT<Chunk<R,E>>):Waiter<R,E>{
+  inline public function pure<R,E>(chk:Outcome<R,E>){
+    return fromOutcome(chk);
+  }
+  public function fromOutcomeReceiver<R,E>(rcv:ReceiverT<Outcome<R,E>>):Waiter<R,E>{
     return lift(rcv);
   }
-  public function map<U>(fn:R->U):Waiter<U,E>{
-    return lift(Receiver.lift(this).map((chk) -> chk.map(fn)));
+}
+private class Destructure{
+  public function new(){}
+  public function map<R,E,U>(fn:R->U,self:Waiter<R,E>):Waiter<U,E>{
+    return Waiter.lift(
+      Receiver.lift(self.prj()).map((chk) -> chk.map(fn))
+    );
+      
   }
-  public function fmap<U>(fn:R->Waiter<U,E>):Waiter<U,E>{
-    var fold = Chunks._.fold.bind(
+  public function fmap<R,E,U>(fn:R->Waiter<U,E>,self:Waiter<R,E>):Waiter<U,E>{
+    var fold = Outcome.inj._.fold.bind(
       (r) -> fn(r),
-      (e) -> fromChunk(End(e)),
-      ()  -> fromChunk(Tap)
+      (e) -> Waiter.inj.fromOutcome(Left(e))
     ).fn()
      .then(_ -> Receiver.lift(_.prj()));
-    var self = Receiver.lift(this);
+    var self = Receiver.lift(self.prj());
     var next = self.fmap(fold);
-    return lift(next.prj());
+    return Waiter.lift(next.prj());
   }
-  public function fold<Z>(val:R->Z,err:Null<TypedError<E>>->Z,nil:Void->Z):Receiver<Z>{
-    return Receiver.lift(this).map(Chunks._.fold.bind(val,err,nil));
+  public function fold<R,E,Z>(val:R->Z,err:Null<TypedError<E>>->Z,self:Waiter<R,E>):Receiver<Z>{
+    return Receiver.lift(self.prj()).map(Outcome.inj._.fold.bind(val,err));
   }
-  public function errata<E0>(fn:TypedError<E>->TypedError<E0>):Waiter<R,E0>{
-    return lift(Receiver.lift(this).map(
-      (chk) -> chk.errata(fn)
-    ));
+  public function errata<R,E,E0>(fn:TypedError<E>->TypedError<E0>,self:Waiter<R,E>):Waiter<R,E0>{
+    return Waiter.lift(
+      Receiver.lift(self.prj()).map((chk -> chk.errata(fn)))
+    );
   }
-  public inline function prj():WaiterT<R,E> return this;
 }

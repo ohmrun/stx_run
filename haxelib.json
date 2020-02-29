@@ -19,7 +19,8 @@
         "stx_fn": "",
         "stx_log": "",
         "stx_parse": "",
-        "stx_proxy": ""
+        "stx_proxy": "",
+        "min-max"   : "git:https://github.com/skial/min-max.git"
     },
     "classPath": "src/main/haxe"
 }

@@ -22,7 +22,7 @@ class Automations{
   @:noUsing static public function yield(arw:Arrowlet<Noise,Automation>):Automation{
     return lift(Yield(JobQueue.unit(),arw.then((x:Automation)->x.prj())));
   }
-  @:noUsing static public inline function conduct<O>(cb:Observer<O>,at:(O->Void)){
+  @:noUsing static public inline function conduct<O>(cb:Reactor<O>,at:(O->Void)){
     var fn = (next:Automation->Void) -> {
       var fn0 = cb.prj().bind(
         (o) -> {

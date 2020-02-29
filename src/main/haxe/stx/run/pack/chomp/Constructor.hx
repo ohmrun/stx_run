@@ -1,5 +1,6 @@
 package stx.run.pack.chomp;
 
-class Constructor{
+@:allow(stx) class Constructor{
+  private function new(){}
   static var _ = new Destructure();
 }
