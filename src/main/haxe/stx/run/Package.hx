@@ -22,10 +22,11 @@ typedef Recall<I,O,R>     = stx.run.pack.Recall<I,O,R>;
 
 typedef Run               = stx.run.pack.Run;
 typedef AutomationError   = stx.run.pack.AutomationError;
+typedef Progression       = stx.run.pack.Progression;
 
-typedef Limit             = stx.run.type.Limit;
-typedef Profile           = stx.run.type.Profile;
+typedef Limit             = stx.run.type.Package.Limit;
 
+typedef Profile           = stx.run.pack.Profile;
 typedef Spinner           = stx.run.pack.Spinner;
 
 typedef Bang              = stx.run.pack.Bang;

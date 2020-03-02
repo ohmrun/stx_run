@@ -1,33 +1,65 @@
 package stx.run.pack.io;
 
+import stx.run.type.Package.Automation  in AutomationT;
+
 class Destructure extends Clazz{
-  public function map<R,Z,E>(fn:R->Z,thiz:IO<R,E>):IO<Z,E>{
-    return IO.lift(thiz.prj().then(
-      (wtr) -> wtr.map(fn)
-    ));
-  }
-  public function fmap<R,Z,E>(fn:R->IO<Z,E>,thiz:IO<R,E>):IO<Z,E>{
-    return IO.lift((auto) -> 
-      Waiter.lift((cb:Outcome<Z,E>->Void)
-        -> thiz(auto)(
-          (chk) -> chk.fold(
-            (v) -> fn(v)(auto)(cb),
-            (e) -> {cb(Left(e));return Automation.unit();}
-          )
-        )
+  // public function feed<R,E>(fn:(Outcome<R,E>->Automation->Void)->Automation):IO<R,E>{
+  //   return lift(
+  //     (auto:Automation,cont:Outcome<R,E>->Void) -> cont(fn.bind(_,auto))
+  //   );
+  // }
+  public function map<R,Z,E>(fn:R->Z,self:IODef<R,E>):IODef<Z,E>{
+    return Recall.anon(
+      (auto:Automation,cont:Outcome<Z,E>->Void) -> self.duoply(auto,
+        (oc:Outcome<R,E>) -> cont(oc.map(fn))
       )
     );
   }
-  public function fold<R,Z,E>(v:R->Z,e:Null<TypedError<E>>->Z,thiz:IO<R,E>):UIO<Z>{
-    return UIO.lift((auto) -> 
-      Receiver.lift((cb) -> thiz(auto)(
-        (chk) -> cb(Outcome.inj._.fold.bind(v,e)(chk))
-      ))
+  // public function fmap<R,Z,E>(fn:R->IO<Z,E>,thiz:IO<R,E>):IO<Z,E>{
+  //   return IO.lift((auto) -> 
+  //     Waiter.lift((cb:Outcome<Z,E>->Void)
+  //       -> thiz(auto)(
+  //         (chk) -> chk.fold(
+  //           (v) -> fn(v)(auto)(cb),
+  //           (e) -> {cb(Left(e));return Automation.unit();}
+  //         )
+  //       )
+  //     )
+  //   );
+  // }
+  public function fold<R,Z,E>(v:R->Z,e:Null<TypedError<E>>->Z,thiz:IODef<R,E>):UIODef<Z>{
+    return Recall.anon(
+      (auto,cb) -> thiz.duoply(auto,(chk) -> cb(chk.fold(v,e)))
     );
   }
-  public function zip<R,Z,R1,E>(fn:R->R1->Z,that:IO<R1,E>,thiz:IO<R,E>):IO<Z,E>{
-    return thiz.fmap(
-      (r) -> that.map(fn.bind(r))
+  public function zip<R,R1,E>(that:IODef<R1,E>,thiz:IODef<R,E>):IODef<Tuple2<R,R1>,E>{
+    return fmap(
+      (r:R) -> that.map(
+        (rr:R1) -> (tuple2(r,rr):Tuple2<R,R1>)
+        ),
+      thiz
+    );
+  }
+  public function fmap<T,TT,E>(fn:T->IODef<TT,E>,self:IODef<T,E>):IODef<TT,E>{
+    return Recall.anon(
+      function (auto:Automation,cbTT:Outcome<TT,E>->Void):Automation { return Interim(
+        Reactor.inj().into((cbA:AutomationT->Void) -> {
+          var trigger_auto      = Future.trigger();
+          var trigger_outcome   = Future.trigger();
+          var future_auto       = trigger_auto.asFuture();
+          var future_outcome    = trigger_outcome.asFuture();
+
+          var error             = (e:Dynamic) -> Default(__.fault().of(UnknownAutomationError(e)));
+
+              future_auto.flatMap(
+                (auto0:Automation) -> future_outcome.map(tuple2.bind(auto0))
+              ).map(__.into2((auto0:Automation,oc:Outcome<T,E>) -> oc.fold((t) -> fn(t).duoply(auto0,cbTT),error))
+              ).handle((auto1:Automation) -> cbA(auto1));
+
+          var auto0 = self.duoply(auto,(oc:Outcome<T,E>) -> trigger_outcome.trigger(oc));
+          trigger_auto.trigger(auto0);
+        })
+      );}
     );
   }
   // public function export<I,O,E,R>(fn:R->Channel<I,O,E>,self:IO<R,E>):Channel<I,O,E>{
@@ -46,4 +78,31 @@ class Destructure extends Clazz{
   //     )
   //   );
   // }
+  public function errata<T,E,EE>(fn:TypedError<E>->TypedError<EE>,self:IODef<T,E>):IODef<T,EE>{
+    return UIO.inj()._.map(
+      (either:Outcome<T,E>) -> either.errata(fn),
+      self
+    );
+  }
+  public function wait<T,E>(?auto:Automation,self:IODef<T,E>):WaiterDef<T,E>{
+    auto = __.option(auto).def(Automation.unit);
+    return Recall.anon(
+      (_:Noise,cont:Outcome<T,E>->Void) -> self.duoply(auto,cont)
+    );
+  }
+  public function point<T,E>(fn:T->EIODef<E>,self:IODef<T,E>):EIODef<E>{
+    return fmap(
+      fn.fn().then(_ -> _.toIO()),
+      self
+    ).fold(
+      (_) -> new Report(None),
+      (e) -> new Report(Some(e))
+    );
+  }
+  public function elide<T,E>(self:IODef<T,E>):IODef<Any,E>{
+    return map(
+      (v:T) -> (v:Any),
+      self
+    );
+  }
 }

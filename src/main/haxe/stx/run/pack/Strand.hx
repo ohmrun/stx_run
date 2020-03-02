@@ -1,6 +1,6 @@
 package stx.run.pack;
 
-import stx.run.pack.strand.Typedef in StrandT;
+import stx.run.type.Package.Strand in StrandT;
 
 @:forward @:callable abstract Strand<O>(StrandT<O>) from StrandT<O>{
   public function new(self) this = self;

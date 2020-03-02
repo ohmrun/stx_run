@@ -4,11 +4,11 @@ import stx.run.pack.task.term.Anon;
 import stx.run.pack.task.term.Deferred;
 import stx.run.pack.task.term.Base;
 
-import stx.run.pack.task.Interface in TaskT;
+import stx.run.type.Package.Task in TaskT;
 
 @:forward abstract Task(TaskT) from TaskT to TaskT{
   static public var NOOP(default,null) : Task = new Task(new Base());
-  static public var inj(default,null)         = new Constructor();
+  static public inline function inj() return new Constructor();
   public function new(self) this = self;
 
   
@@ -17,8 +17,7 @@ import stx.run.pack.task.Interface in TaskT;
     return Automation.pure(Queue.lift([this]));
   }
 }
-private class Constructor{
-  public function new(){}
+private class Constructor extends Clazz{
 
   public function anon(execute:Void->Void,?release:Void->Void,?cleanup:Void->Void):Task{
     return new Anon(execute,release,cleanup);
@@ -29,7 +28,7 @@ private class Constructor{
   public inline function conduct<O>(fn:O->Void,o:O):Task{
     return pursue(fn.bind(o));
   }
-  public inline function deferred(obs:Reactor<Task>):Task{
+  public inline function deferred(obs:ReactorDef<Task>):Task{
     return new Deferred(obs);
   }
 }

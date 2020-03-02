@@ -3,7 +3,7 @@ package stx.run.pack.task.term;
 class Deferred extends Base{
   var escaped     : Bool;
   var poll        : Backoff;
-  var deferred    : Reactor<Task>;
+  var deferred    : ReactorDef<Task>;
   var impl        : Task;
   var init        : Bool;
 
@@ -61,9 +61,9 @@ class Deferred extends Base{
           next(Noise);
         }
       }
-      var later = Reactor.lift(reactor);
+      var later = Reactor.inj().into(reactor);
 
-      this.deferred(
+      this.deferred.upply(
         (x) -> {
           this.impl     = x;
           respond();

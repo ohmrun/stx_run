@@ -1,7 +1,7 @@
 package stx.run.pack;
 
-import stx.run.pack.uio.Typedef in UIOT;
-import stx.run.pack.automation.Typedef in AutomationT;
+import stx.run.type.Package.Automation  in AutomationT;
+
 import stx.run.pack.automation.Constructor;
 
 @:access(stx.run.pack.automation) abstract Automation(AutomationT) from AutomationT to AutomationT{

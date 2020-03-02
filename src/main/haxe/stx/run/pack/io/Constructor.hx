@@ -1,56 +1,59 @@
 package stx.run.pack.io;
 
-import stx.run.pack.io.Typedef in IOT;
-
-@:allow(stx) class Constructor{
-  private function new(){}
-
-  public var _(default,null) = new Destructure();
+class Constructor extends Clazz{
+  static public var ZERO(default,never) = new Constructor();
+  public var _(default,never) = new Destructure();
   
-  public inline function lift<R,E>(io:IOT<R,E>){
-    return new IO(io);
-  }
-  public inline function pure<R>(v:R):IO<R,Noise>{
+  public inline function pure<R>(v:R):IODef<R,Noise>{
     return fromThunk(() -> v);
   }
-  public function feed<T>(handler:(T->Void)->Automation){
-    return lift(Recall.inj.lift(
-      (auto,cont) -> {
+  public function feed<T,E>(handler:(Outcome<T,E>->Void)->Automation){
+    return Recall.anon(
+      (auto:Automation,cont:Outcome<T,E>->Void) -> {
         return auto.concat(handler(cont));
       }
-    ));
+    );
   }
-  public function call<T>(handler:(T->Void)->Void){
-    return feed(handler.fn().returning(Automation.unit()));
+  public function call<T,E>(handler:(Outcome<T,E>->Void)->Void){
+    return feed( 
+      (cb:Outcome<T,E>->Void) -> {
+        handler(cb);
+        return Automation.unit();
+      }
+    );
   }
-  public inline function fromUIOT<O>(fn:Recall<Automation,O,Automation>):IO<O,Noise>{
-    return feed((handler) -> fn(Noise,
-      (o) -> handler(Right(o))
-    ));
+  public inline function fromUIOT<T>(fn:Recall<Automation,T,Automation>):IODef<T,Dynamic>{
+    return Recall.anon(
+      (auto:Automation,cb:Outcome<T,Dynamic>->Void) -> fn.duoply(auto,
+        (t:T) -> cb(__.success(t))
+      )
+    );
   }
-  public inline function fromIOT<O,E>(fn:Automation->((Outcome<O,E>->Void)->Automation)):IO<O,E>{
-    return lift(Recall.inj.lift(fn));
+  public inline function fromIOT<O,E>(fn:Automation->(Outcome<O,E>->Void)->Automation):IODef<O,E>{
+    return Recall.anon(
+      (auto,cb) -> fn(auto,cb)
+    );
   }
-  public inline function fromOutcomeThunk<R,E>(chk:Thunk<Outcome<R,E>>):IO<R,E>{
+  public inline function fromOutcomeThunk<R,E>(chk:Thunk<Outcome<R,E>>):IODef<R,E>{
     return call((handler) -> handler(chk()));
   }
-  public inline function fromOutcome<R,E>(chk:Outcome<R,E>):IO<R,E>{
+  public inline function fromOutcome<R,E>(chk:Outcome<R,E>):IODef<R,E>{
     return fromOutcomeThunk(()->chk);
   }
-  public inline function fromThunk<R>(thk:Thunk<R>):IO<R,Noise>{
+  public inline function fromThunk<R>(thk:Thunk<R>):IODef<R,Noise>{
     return fromOutcomeThunk(thk.then(Right).then(Outcome.lift));
   }
 
-  public inline function bfold<A,E,R>(fn:A->R->IO<R,E>,arr:Array<A>,r:R):IO<R,E>{
+  public inline function bfold<A,E,R>(fn:A->R->IODef<R,E>,arr:Array<A>,r:R):IODef<R,E>{
     return arr.lfold(
-      (next,memo:IO<R,E>) -> return memo.fmap((r:R) -> fn(next,r)),
+      (next,memo:IODef<R,E>) -> return memo.fmap((r:R) -> fn(next,r)),
       fromOutcome(Right(r))
     );
   }
-  public inline function fromUnary<E,R>(fn:Unary<Noise,Outcome<R,E>>):IO<R,E>{
+  public inline function fromUnary<E,R>(fn:Unary<Noise,Outcome<R,E>>):IODef<R,E>{
     return fromOutcomeThunk(fn.bind1(Noise));
   }
-  public inline function fromUnaryConstructor<E,R>(fn:Unary<Noise,IO<R,E>>):IO<R,E>{
-    return feed((handler) -> fn(Noise)(Automation.unit(),handler));
+  public inline function fromUnaryConstructor<E,R>(fn:Unary<Noise,IODef<R,E>>):IODef<R,E>{
+    return feed((handler) -> fn(Noise).duoply(Automation.unit(),handler));
   }
 }

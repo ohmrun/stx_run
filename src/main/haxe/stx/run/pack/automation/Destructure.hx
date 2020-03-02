@@ -1,16 +1,32 @@
 package stx.run.pack.automation;
 
-class Destructure{
-  var log = __.log().trace;
-  private function new(){
+import stx.run.type.Package.Automation in AutomationT;
 
-  }
+class Destructure extends Clazz{
+  var log = __.log().trace;
+
   public function seq(fn:Queue->Automation,self:Automation):Automation{
-    var f = seq.bind(fn);
     return switch self {
-      case Interim(rcv)           : Interim(rcv.map(f));
-      case Operate(f1)            : Operate(f1.mod(f));
-      case Release(r)             : fn(r);
+      case Interim(rcv)           : Interim(
+        rcv.map(
+          function(chomp:Automation):AutomationT { return switch(chomp){
+            case Default(e)   : Default(e);
+            case Operate(o)   : Operate(o.mod(seq.bind(fn)));
+            case Interim(rct) : Interim(
+              rct.map(
+                function (chomp) return seq(fn,chomp).prj()
+              )
+            );
+            case Release(q)   : Operate(
+              Operation.fromThunk(
+                () -> seq(fn,fn(q))
+              )
+            );
+          }
+        })
+      );
+      case Operate(f1)            : Operate(f1.mod(seq.bind(fn)));
+      case Release(r)             : fn(r).prj();
       case Default(e)             : Default(e);
     }
   }
@@ -43,7 +59,7 @@ class Destructure{
       switch(self){
         case Interim(ft)          : 
           push(() -> {
-            ft(Noise,cookie_monster);
+            ft.upply(cookie_monster);
           });
         case Operate(next)        : 
           push(

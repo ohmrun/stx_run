@@ -1,6 +1,6 @@
 package stx.run.pack.task.term;
 
-import stx.run.pack.task.Interface in TaskT;
+import stx.run.type.Package.Task in TaskT;
 import tink.concurrent.Mutex;
 
 /**
@@ -109,12 +109,12 @@ class Base implements TaskT {
   }  
   public var uuid(default,null) : String = __.uuid();
 
-  public function asTask():Interface{
+  public function asTask():TaskT{
     return this;
   }
-  public function asDeferred():Interface{
+  public function asDeferred():TaskT{
     return new Deferred(
-      Reactor.lift(
+      Reactor.inj().into(
         (cb) -> cb(this.asTask())
       )
     ).asTask();

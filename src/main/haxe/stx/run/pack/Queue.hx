@@ -30,7 +30,7 @@ import stx.run.pack.queue.TypeDef in QueueT;
     var spinner = new Spinner(Profile.conf(limit).limit);
 
     function rec(self:Array<Task>){
-      spinner.spin(self)(
+      spinner.spin(self).upply(
         (changed) -> {
           if(changed){
             profile = profile.change();

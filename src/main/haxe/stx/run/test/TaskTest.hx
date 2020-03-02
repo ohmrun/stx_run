@@ -14,7 +14,7 @@ class TaskTest extends utest.Test{
     Assert.isTrue(has_been_called.value);
 
     var a = false;
-    var task = Task.inj.anon(
+    var task = Task.inj().anon(
       () -> a = true
     );
 
@@ -26,7 +26,7 @@ class TaskTest extends utest.Test{
   public function test_deferred_sync(){
     var hbc : Ref<Bool> = false;
 
-    var sync_reactor = Reactor.pure(
+    var sync_reactor = Reactor.inj().pure(
       new SimpleTask(hbc).asTask()
     );
     var task = new Deferred(sync_reactor);
@@ -36,7 +36,7 @@ class TaskTest extends utest.Test{
   }
   public function test_deferred_async(async:Async){
     var task = new DeferredSimpleTask(async).asTask();
-    var async_reactor = Reactor.lift(
+    var async_reactor = Reactor.inj().into(
       (cb) -> {
         __.log().close().trace('cb called: ${task.progress.data}');
         __.run().delay(20).map(
@@ -44,14 +44,14 @@ class TaskTest extends utest.Test{
             __.log().close().trace('after_wait: ${task.progress.data}');
             return task;
           }
-        )(cb);
+        ).upply(cb);
       }
     );
     var task = new Deferred(async_reactor);
     Assert.same(Pending,task.progress.data);
         task.pursue();
     switch(task.progress.data){
-      case Waiting(rct) : rct(
+      case Waiting(rct) : rct.upply(
         (_) -> Assert.pass()
       );
       default:

@@ -1,6 +1,6 @@
 package stx.run.pack.strand;
 
-import stx.run.pack.strand.Typedef in StrandT;
+import stx.run.type.Package.Strand in StrandT;
 
 @:allow(stx)class Constructor{
   public function new(){}

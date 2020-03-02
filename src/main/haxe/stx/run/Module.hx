@@ -4,12 +4,11 @@ import stx.run.module.*;
 
 class Module{
   public function new(){}
-  public inline function bang():Bang{
-    return Bang.unit();
+  public inline function bang():BangDef{
+    return Bang.inj().unit();
   }
-  public function delay(milliseconds:Int):Reactor<Noise>{
-
-    return Reactor.inj.call(
+  public function delay(milliseconds:Int):ReactorDef<Noise>{
+    return Reactor.inj().into(
       (cb) -> {
         defer(
           () -> haxe.Timer.delay(cb.bind(Noise),milliseconds)

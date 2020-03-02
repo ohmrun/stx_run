@@ -1,6 +1,6 @@
 package stx.run.pack;
 
-import stx.run.pack.chomp.Enum in ChompT;
+import stx.run.announce.Package.Chomp in ChompT;
 
 abstract Chomp<R,E>(ChompT<R,E>) from ChompT<R,E> to ChompT<R,E>{
   static public var inj(default,null)  = new stx.run.pack.chomp.Constructor();

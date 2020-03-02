@@ -3,7 +3,13 @@ name = "stx_run"
 version = "0.1.0"
 authors = ["dayz <polysemantic@gmail.com>"]
 edition = "2018"
+include = ['src/main/rust/**']
 
+[[bin]]
+name="stx_run"
+path="src/main/rust/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+#[lib]
+#path = "src/main/rust/lib.rs"
 [dependencies]

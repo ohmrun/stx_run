@@ -1,4 +1,4 @@
-package stx.run.type;
+package stx.run.pack;
 
 class Profile{
   public var references(default,null)   : Int;
