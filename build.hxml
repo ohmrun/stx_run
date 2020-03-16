@@ -10,6 +10,7 @@
 -lib stx_fn
 -lib stx_log
 -lib stx_fp
+-lib stx_convention
 
 -lib min-max
 -lib stx_parse

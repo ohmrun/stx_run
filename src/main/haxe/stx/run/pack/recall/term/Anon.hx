@@ -1,7 +1,7 @@
 package stx.run.pack.recall.term;
 
 class Anon<I,O,R> extends Base<I,O,R>{
-  var _duoply : (i:I,cb:(O -> Void)) -> R;
+  var _duoply : RecallFun<I,O,R>;
   var done    : Bool;
   var res     : R;
   public function new(_duoply){

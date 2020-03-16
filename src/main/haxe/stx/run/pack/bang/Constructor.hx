@@ -5,9 +5,14 @@ class Constructor extends Clazz{
 
   public var _ = new Destructure();
   
-  public function unit():BangDef{
-    return Reactor.inj().into(
+  public function unit():Bang{
+    return Reactor.into(
       (handler) -> handler(Noise)
-    ).prj();
+    ).asRecallDef();
+  }
+  public function fromFuture(ft:Future<Noise>):Bang{
+    return Recall.Anon(
+      (_:Noise,cb) -> ft.handle(cb)
+    );
   }
 }

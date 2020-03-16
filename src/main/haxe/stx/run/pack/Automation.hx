@@ -1,32 +1,28 @@
 package stx.run.pack;
 
-import stx.run.type.Package.Automation  in AutomationT;
-
 import stx.run.pack.automation.Constructor;
 
-@:access(stx.run.pack.automation) abstract Automation(AutomationT) from AutomationT to AutomationT{
-  public function new(self:AutomationT) this = self;
-  static public var inj(default,null)       = new stx.run.pack.automation.Constructor();
+@:access(stx.run.pack.automation) abstract Automation(AutomationDef) from AutomationDef to AutomationDef{
+  public function new(self:AutomationDef) this = self;
+  static public inline function _() return stx.run.pack.automation.Constructor.ZERO;
 
-  static public inline function lift(self:AutomationT)          return new Automation(self);
+  static public function lift(self:AutomationDef):Automation                                                         return new Automation(self);
+  static public function unit()                                                                                      return lift(Task.ZERO);
 
-  @:noUsing static public function fromTask(t:Task)             return lift(Release(Queue.unit().snoc(t)));
-  @:noUsing static public function unit<E>():Automation         return inj.unit();
-  @:noUsing static public function pure<E>(jobs):Automation     return inj.pure(jobs);
-
-  public function seq(fn:Queue->Automation):Automation          return inj._.seq(fn,self);
-  public function mod(fn:Queue->Queue):Automation               return inj._.mod(fn,self);
-
-
-  public function concat(that)                                  return inj._.concat(that,self);
-  public function snoc(task)                                    return inj._.snoc(task,self);
-  public function cons(that:Task):Automation                    return inj._.cons(that,self);
+  static public function into(handler:Sink<Either<Automation,Report<AutomationFailure<Dynamic>>>>->Void):Automation  return _().into(handler);
+  static public function failure(err:TypedError<AutomationFailure<Dynamic>>):Automation                              return _().failure(err);
+  static public function interim(thk:ReactorDef<Automation>):Automation                                              return _().interim(thk);
+  static public function execute<E>(thk:Void->Option<TypedError<E>>):Automation                                      return _().execute(thk);
 
 
-  public function crunch()                                      return inj._.crunch(self);
-  public function submit()                                      return inj._.submit(self);
+  public function snoc(task)                                      return _()._.snoc(task,self);
+  public function cons(that:Task):Automation                      return _()._.cons(that,self);
+  
+  public function submit()                                        return _()._.submit(self);
 
-  public function prj():AutomationT return this;
+  public function prj():AutomationDef return this;
   private var self(get,never):Automation;
   private function get_self():Automation return lift(this);
+
+  
 }

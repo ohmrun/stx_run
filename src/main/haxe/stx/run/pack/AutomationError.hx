@@ -8,6 +8,7 @@ class AutomationError extends TypedError<AutomationFailure<Dynamic>>{
   static public function make(data:AutomationFailure<Dynamic>, ?prev:Option<TypedError<AutomationFailure<Dynamic>>>, ?pos:Pos):AutomationError{
     var code    = 500;
     var message = Std.string(data);
-    return new AutomationError(code,message,Some(data),prev,pos);
+    
+    return new AutomationError(ErrorCode.inj().five_hundred(),message,Some(ERR_(data)),prev,pos);
   }
 }

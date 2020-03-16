@@ -22,7 +22,7 @@ class Alt extends TaskBase{
       }
     );
   }
-  override public function doCleanup(){
+  override public function do_cleanup(){
     this.gen = () -> None;
     this.arr = [];
   }

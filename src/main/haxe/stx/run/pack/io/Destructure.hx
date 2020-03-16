@@ -1,6 +1,5 @@
 package stx.run.pack.io;
 
-import stx.run.type.Package.Automation  in AutomationT;
 
 class Destructure extends Clazz{
   // public function feed<R,E>(fn:(Outcome<R,E>->Automation->Void)->Automation):IO<R,E>{
@@ -9,7 +8,7 @@ class Destructure extends Clazz{
   //   );
   // }
   public function map<R,Z,E>(fn:R->Z,self:IODef<R,E>):IODef<Z,E>{
-    return Recall.anon(
+    return Recall.Anon(
       (auto:Automation,cont:Outcome<Z,E>->Void) -> self.duoply(auto,
         (oc:Outcome<R,E>) -> cont(oc.map(fn))
       )
@@ -28,7 +27,7 @@ class Destructure extends Clazz{
   //   );
   // }
   public function fold<R,Z,E>(v:R->Z,e:Null<TypedError<E>>->Z,thiz:IODef<R,E>):UIODef<Z>{
-    return Recall.anon(
+    return Recall.Anon(
       (auto,cb) -> thiz.duoply(auto,(chk) -> cb(chk.fold(v,e)))
     );
   }
@@ -41,15 +40,15 @@ class Destructure extends Clazz{
     );
   }
   public function fmap<T,TT,E>(fn:T->IODef<TT,E>,self:IODef<T,E>):IODef<TT,E>{
-    return Recall.anon(
-      function (auto:Automation,cbTT:Outcome<TT,E>->Void):Automation { return Interim(
-        Reactor.inj().into((cbA:AutomationT->Void) -> {
+    return Recall.Anon(
+      function (auto:Automation,cbTT:Outcome<TT,E>->Void):Automation { return Automation.interim(
+        Reactor.into((cbA:AutomationDef->Void) -> {
           var trigger_auto      = Future.trigger();
           var trigger_outcome   = Future.trigger();
           var future_auto       = trigger_auto.asFuture();
           var future_outcome    = trigger_outcome.asFuture();
 
-          var error             = (e:Dynamic) -> Default(__.fault().of(UnknownAutomationError(e)));
+          var error             = (e:Dynamic) -> Automation.failure(__.fault().of(E_UnknownAutomation(e)));
 
               future_auto.flatMap(
                 (auto0:Automation) -> future_outcome.map(tuple2.bind(auto0))
@@ -79,14 +78,14 @@ class Destructure extends Clazz{
   //   );
   // }
   public function errata<T,E,EE>(fn:TypedError<E>->TypedError<EE>,self:IODef<T,E>):IODef<T,EE>{
-    return UIO.inj()._.map(
+    return __._(UIO._).map(
       (either:Outcome<T,E>) -> either.errata(fn),
       self
     );
   }
   public function wait<T,E>(?auto:Automation,self:IODef<T,E>):WaiterDef<T,E>{
     auto = __.option(auto).def(Automation.unit);
-    return Recall.anon(
+    return Recall.Anon(
       (_:Noise,cont:Outcome<T,E>->Void) -> self.duoply(auto,cont)
     );
   }

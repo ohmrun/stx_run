@@ -1,8 +1,8 @@
 package stx.run.pack.reactor;
 
 class Destructure extends Clazz{
-  public function or<T>(that:ReactorDef<T>,self:ReactorDef<T>){
-    return Reactor.inj().into(
+  public function or<T>(that:Reactor<T>,self:Reactor<T>){
+    return Reactor.into(
       (cb) -> {
         var done    = false;
         var uber_cb = (t:T) -> {
@@ -16,26 +16,26 @@ class Destructure extends Clazz{
       } 
     );
   }
-  public function fmap<T,TT>(fn:T->ReactorDef<TT>,self:ReactorDef<T>):ReactorDef<TT>{
-    return Reactor.inj().into(
+  public function fmap<T,TT>(fn:T->Reactor<TT>,self:Reactor<T>):Reactor<TT>{
+    return Reactor.into(
       (cb:TT->Void) -> self.upply(
         (t:T) -> fn(t).upply(cb)
       )
     );
   }
-  public function map<T,TT>(fn:T->TT,self:ReactorDef<T>):ReactorDef<TT>{
-    return Reactor.inj().into(
+  public function map<T,TT>(fn:T->TT,self:Reactor<T>):Reactor<TT>{
+    return Reactor.into(
       (cbTT) -> self.upply(
         (t) -> cbTT(fn(t))
       )
     );
   }
-  public function toReceiver<T>(self:ReactorDef<T>):ReceiverDef<T>{
-    return Receiver.inj().into((cont) -> {
-      return Task.inj().pursue(self.duoply.bind(Noise,cont));
+  public function toReceiver<T>(self:Reactor<T>):Receiver<T>{
+    return Receiver.into((cont) -> {
+      return Task.Anon(self.duoply.bind(Noise,cont));
     });
   }
-  public function upply<T>(cb:T->Void,self:ReactorDef<T>):Void{
-    self.prj().duoply(Noise,cb);
+  public function upply<T>(cb:T->Void,self:Reactor<T>):Void{
+    self.asRecallDef().duoply(Noise,cb);
   }
 }

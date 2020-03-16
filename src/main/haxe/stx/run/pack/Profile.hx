@@ -10,7 +10,7 @@ class Profile{
   public var changed(default,null):Int;//at which repeat did this last change?
   public var modified(default,null):Float;//when did the progression last change?
 
-  static public function conf(?limit):Profile{
+  @:noUsing static public function conf(?limit:Limit):Profile{
     return new Profile(null,limit);
   }
   private function new(?timer:Timer,?limit,repeats = 0,changed = 0,?modified,?progress,?references = 0){

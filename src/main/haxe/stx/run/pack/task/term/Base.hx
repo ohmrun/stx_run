@@ -1,12 +1,12 @@
 package stx.run.pack.task.term;
 
-import stx.run.type.Package.Task in TaskT;
+
 import tink.concurrent.Mutex;
 
 /**
   Shamelessly pilferred from tink.
 **/
-class Base implements TaskT {
+class Base implements TaskApi {
   /**
    * Locks are generally not the best idea. Given the intended life cycle of a task,
    * this should not be an issue. Since the `pursue` or `cancel` method of a single `Task` are 
@@ -22,48 +22,48 @@ class Base implements TaskT {
   public var working(get,null): Bool;
   public function get_working():Bool{
     return switch(progress.data){
-      case Unready | Polling(_) | Waiting(_) | Reready : true;
+      case Pending | Polling(_) | Waiting(_) : true;
       default : false;
     }
   }
-  public var hanging(get,null): Bool;
-  public function get_hanging():Bool{
+  public var ongoing(get,null): Bool;
+  public function get_ongoing():Bool{
     return switch(progress.data){
-      case Unready | Polling(_) | Waiting(_) : true;
+      case Pending | Polling(_) | Waiting(_) : true;
       default : false;
     }
   }
 
   final public function escape():Void 
     exec(function () {
-      progress = Unique.pure(Already);
-      doEscape();
-      doCleanup();
+      progress = Progression.pure(Escaped);
+      do_escape();
+      do_cleanup();
     });
   
   function exec(f) {
     if (!m.tryAcquire()) return;
     
     switch(progress.data){
-      case Problem(_) | Already : 
+      case Problem(_) | Secured | Escaped: 
       default : 
         try f()
           catch(e:TypedError<Dynamic>){
             m.release();
-            var data = e.map(UnknownAutomationError);
+            var data = e.map(E_UnknownAutomation);
             switch(e.uuid){
               case AutomationError.UUID : 
-                this.progress = Unique.pure(Problem(Std.downcast(e,AutomationError)));
+                this.progress = Progression.pure(Problem(Std.downcast(e,AutomationError)));
               default : 
-                this.progress = Unique.pure(Problem(data));
+                this.progress = Progression.pure(Problem(data));
             }
           }catch(e:Dynamic) {
             m.release();
-            var data = UnknownAutomationError(e);
+            var data = E_UnknownAutomation(e);
             if (Std.string(e) == 'Stack overflow'){
-              data = StackOverflow;
+              data = E_StackOverflow;
             }
-          this.progress = Unique.pure(Problem(AutomationError.make(data,None,__.fault().prj())));
+          this.progress = Progression.pure(Problem(AutomationError.make(data,None,__.fault().prj())));
           }
     }
     m.release();
@@ -71,35 +71,32 @@ class Base implements TaskT {
   
   final public function pursue():Void 
     exec(function () {
-      if(progress == Pending){
-        progress = Unique.pure(Unready);
-      }
-      var cont = doPursue();  
+      var cont = do_pursue();  
       if(cont == true){
-        if(!hanging){
-          progress = Unique.pure(Reready);
+        if(!ongoing){
+          progress = Progression.pure(Pending);
         }
       }else{
-        progress = Unique.pure(Already);
+        progress = Progression.pure(Secured);
       }
       switch(progress.data){
-        case Already :
-          doCleanup();
+        case Secured | Escaped :
+          do_cleanup();
         default:
       }
     });
   
   public function new() {
-    this.progress   = Unique.pure(Pending);
+    this.progress   = Progression.pure(Pending);
     this.m          = new Mutex();
   }
   
-  function doPursue():Bool{
+  function do_pursue():Bool{
     return false;
   }
-  function doEscape() {}
+  function do_escape() {}
   
-  function doCleanup() {}
+  function do_cleanup() {}
 
   public inline function definition(){
     return std.Type.getClass(this);
@@ -109,14 +106,30 @@ class Base implements TaskT {
   }  
   public var uuid(default,null) : String = __.uuid();
 
-  public function asTask():TaskT{
+  public function asTaskApi():TaskApi{
     return this;
   }
-  public function asDeferred():TaskT{
+  public function toDeferred():TaskApi{
     return new Deferred(
-      Reactor.inj().into(
-        (cb) -> cb(this.asTask())
+      Reactor.into(
+        (cb) -> cb(this.asTaskApi())
       )
-    ).asTask();
+    ).asTaskApi();
+  }
+  function post(progress){
+    return switch(progress.data){
+      case Pending      : true;
+      case Polling(_)   : true;
+      case Waiting(cb)  : false;
+      case Problem(e)   : false;
+      case Escaped      : false;
+      case Secured      : false;
+    }
+  }
+  private function progression(progress){
+    this.progress = Progression.pure(progress);
+  }
+  public function toSchedule(){
+    return new stx.run.pack.schedule.term.Task(this).asScheduleApi();
   }
 }

@@ -3,7 +3,7 @@ package stx.run.pack.task.term;
 class Deferred extends Base{
   var escaped     : Bool;
   var poll        : Backoff;
-  var deferred    : ReactorDef<Task>;
+  var deferred    : Reactor<Task>;
   var impl        : Task;
   var init        : Bool;
 
@@ -24,27 +24,27 @@ class Deferred extends Base{
         this.impl.pursue();
       }
       switch(this.impl.progress.data){
-        case Pending                      : //???
-        case Unready                      : 
-
         case Polling(_)         : this.progress = this.impl.progress;
         case Waiting(_)         : this.progress = this.impl.progress;
         case Problem(_)         : this.progress = this.impl.progress;
-        case Already            : this.progress = this.impl.progress;
-        case Reready            : this.progress = this.impl.progress;
+        
+        case Pending            : this.progress = this.impl.progress;
+
+        case Secured            : this.progress = this.impl.progress;
+        case Escaped            : this.progress = this.impl.progress;
       }
     }
     return should_pursue();
   }  
   inline function should_pursue(){
     return switch(progress.data){
-      case Pending | Reready | Waiting(_) | Polling(_)  : true;
+      case Pending | Waiting(_) | Polling(_)  : true;
       default                                 : false;
     }
   }
-  override function doPursue(){
+  override function do_pursue(){
     if(!init){
-      this.progress = Unique.pure(Unready);
+      this.progress = Progression.pure(Pending);
       __.log().close().trace('init');
       init = true;
 
@@ -61,7 +61,7 @@ class Deferred extends Base{
           next(Noise);
         }
       }
-      var later = Reactor.inj().into(reactor);
+      var later = Reactor.into(reactor);
 
       this.deferred.upply(
         (x) -> {
@@ -76,25 +76,25 @@ class Deferred extends Base{
         doDelegate();
       }else{
         __.log().close().trace('asynchronous');
-        this.progress = Unique.pure(Waiting(later));
+        this.progress = Progression.pure(Waiting(later));
       }
     }else{
       __.log().close().trace('cont');
-      if(__.that().alike().ok(Waiting(null),this.progress)){
+      if(__.that().alike().ok(Waiting(null),new EnumValue(this.progress.data).prj())){
         if(arrived){
           doDelegate();
         }else{
           //still waiting, if I'm being called it must be polling time.
           poll.roll();
-          this.progress = Unique.pure(Polling(poll.delta));
+          this.progress = Progression.pure(Polling(poll.delta));
         }
-      }else if(__.that().alike().ok(Polling(null),this.progress)){
+      }else if(__.that().alike().ok(Polling(null),this.progress.data)){
         if(arrived){
           doDelegate();
         }else{
           if(this.poll.ready()){
             poll.roll();
-            this.progress = Unique.pure(Polling(poll.delta));
+            this.progress = Progression.pure(Polling(poll.delta));
           }else{
             //not ready, not passed the polling time: ignore.
           }
@@ -105,10 +105,13 @@ class Deferred extends Base{
     }
     return should_pursue();
   }
-  override function doEscape(){
+  override function do_escape(){
     this.escaped = true;
+    deferred.upply(
+      (task) -> task.escape()
+    );
   }
-  override public function asDeferred(){
-    return this.asTask();
+  override public function toDeferred(){
+    return this.asTaskApi();
   }
 }

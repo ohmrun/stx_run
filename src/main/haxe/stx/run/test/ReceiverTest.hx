@@ -4,7 +4,7 @@ class ReceiverTest extends utest.Test{
   //@Ignored
   public function test(){
     var n = 0;
-    var receiver = Receiver.inj().into(
+    var receiver = Receiver.into(
       (cb) -> {
         __.log().close().trace('callback called');
         n++;
@@ -18,7 +18,7 @@ class ReceiverTest extends utest.Test{
   //@Ignored
   public function test_async0(async:utest.Async){
     __.log().close().trace('test_async0');
-    var receiver = Receiver.inj().into(
+    var receiver = Receiver.into(
       (cb) -> {
         __.log().close().trace('callback called');
         cb(Noise);
@@ -27,19 +27,21 @@ class ReceiverTest extends utest.Test{
       }
     );
     //receiver((_)->{});
-    __.run().defer(receiver.apply.bind((_)->{}));
+    Act.Defer().upply(
+      receiver.apply.bind((_)->{})
+    );
   }
 
   public function test_async1(async:utest.Async){
     __.log().close().trace('test_async0');
-    var receiver = Receiver.inj().into(
+    var receiver = Receiver.into(
       (cb) -> {
         __.log().close().trace('callback called');
-        __.run().defer(cb.bind(Noise));
+        Act.Defer().upply(cb.bind(Noise));
       }
     );
     //receiver((_)->{});
-    __.run().defer(receiver.apply.bind((_)->{
+    Act.Defer().upply(receiver.apply.bind((_)->{
       Assert.pass();
       async.done();
     }));

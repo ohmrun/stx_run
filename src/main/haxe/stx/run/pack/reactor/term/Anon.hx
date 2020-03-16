@@ -1,7 +1,7 @@
 package stx.run.pack.reactor.term;
 
 class Anon<T> extends stx.run.pack.recall.term.Base<Noise,T,Void>{
-  private var _duoply : RecallFunction<Noise,T,Void>;
+  private var _duoply : RecallFun<Noise,T,Void>;
   private var done    : Bool;
   public function new(_duoply){
     super();

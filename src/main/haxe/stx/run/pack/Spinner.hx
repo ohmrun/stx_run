@@ -16,7 +16,7 @@ class Spinner{
     returning poll == false
   **/
   public function spin(tasks:Array<Task>):ReactorDef<Bool>{
-  return Reactor.inj().into(
+  return Reactor.into(
       (cb) -> {
         var done  = false;
         var waits : Array<ReactorDef<Noise>>  = [];
@@ -29,7 +29,6 @@ class Spinner{
               task.pursue();
               cb(true);
               break;
-            case Unready :
             case Polling(milliseconds):
               polls.prj().push(milliseconds);
             case Waiting(cb):
@@ -39,10 +38,7 @@ class Spinner{
               throw(e);
               cb(true);
               break;
-            case Reready:
-              done = true;
-              cb(true);
-            case Already:
+            case Secured | Escaped:
           }
         }
         if(!done){
@@ -66,7 +62,7 @@ class Spinner{
   }
   //anything that's waiting
   function get_wait_any(waits:Array<ReactorDef<Noise>>){
-    return Reactor.inj().any(waits).def(Reactor.inj().unit);
+    return Reactor.any(waits).def(Reactor.unit);
   }
   //earliest poll invitation
   function get_poll_any(polls:Array<Int>){

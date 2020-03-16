@@ -1,24 +1,22 @@
 package stx.run.pack.receiver;
 
-import stx.run.type.Package.Automation in AutomationT;
-
 class Destructure extends Clazz{
-  public function toWaiter<T>(self:ReceiverDef<T>):WaiterDef<T,Dynamic>{
-    return Waiter.inj().fromReceiver(self);
+  public function toWaiter<T>(self:Receiver<T>):Waiter<T,Dynamic>{
+    return Waiter.fromReceiver(self);
   }
 
-  public function map<T,TT>(fn:T->TT,self:ReceiverDef<T>):ReceiverDef<TT>{
-    return Receiver.inj().into(
+  public function map<T,TT>(fn:T->TT,self:Receiver<T>):Receiver<TT>{
+    return Receiver.into(
       (cb) -> self.apply(
         (t) -> cb(fn(t))  
       )
     );
   }
-  public function fmap<T,TT>(fn:T->ReceiverDef<TT>,self:ReceiverDef<T>):ReceiverDef<TT>{
-    return Receiver.inj().into(
-      (cbTT:TT->Void) -> Interim(
-        Reactor.inj().into(
-          (cbA:AutomationT->Void) -> {
+  public function fmap<T,TT>(fn:T->Receiver<TT>,self:Receiver<T>):Receiver<TT>{
+    return Receiver.into(
+      (cbTT:TT->Void) -> Automation.interim(
+        Reactor.into(
+          (cbA:AutomationDef->Void) -> {
             var auto_trigger  = Future.trigger();
             var value_trigger = Future.trigger();
 
@@ -42,12 +40,12 @@ class Destructure extends Clazz{
       )
     );
   }
-  public function apply<T>(cb:T->Void,self:ReceiverDef<T>):Automation{
+  public function apply<T>(cb:T->Void,self:Receiver<T>):Automation{
     return self.duoply(Noise,cb);
   }
-  public function toUIO<T>(self:ReceiverDef<T>):UIODef<T>{
-    return Recall.anon(
-      (auto:Automation,cb:T->Void) -> auto.concat(self.apply(cb))
+  public function toUIO<T>(self:Receiver<T>):UIODef<T>{
+    return Recall.Anon(
+      (auto:Automation,cb:T->Void) -> auto.snoc(self.apply(cb))
     );
   }
 }

@@ -1,9 +1,14 @@
 package stx.run.pack;
 
-import stx.run.type.Package.Automation  in AutomationT;
-
-
 @:using(stx.run.pack.io.Implementation)
-class Receiver<T> extends stx.run.pack.recall.term.Base<Noise,T,Automation>{
-  static public inline function inj() return stx.run.pack.receiver.Constructor.ZERO;
+@:forward abstract Receiver<T>(ReceiverDef<T>) from ReceiverDef<T> to ReceiverDef<T>{
+  static public inline function _() return stx.run.pack.receiver.Constructor.ZERO;
+
+  static public function fromFuture<T>(ft:Future<T>):Receiver<T>         return _().fromFuture(ft);
+  static public function fromThunk<T>(thk:Thunk<T>):Receiver<T>          return _().fromThunk(thk);
+  static public function fromReactor<T>(rct:ReactorDef<T>):Receiver<T>   return _().fromReactor(rct);
+
+  static public function into<T>(handler:(T->Void)->Void):Receiver<T>    return _().into(handler);
+  static public function feed<T>(cb:(T->Void)->Automation):Receiver<T>   return _().feed(cb);
+  static public function pure<T>(t:T):Receiver<T>                        return _().pure(t);
 }

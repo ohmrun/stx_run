@@ -1,13 +1,11 @@
 package stx.run.pack.uio;
 
-import stx.run.type.Package.Automation in AutomationT;
-
 class Destructure extends Clazz{
   public function map<T,TT>(fn:T->TT,self:UIODef<T>):UIODef<TT>{
-    return Recall.anon((auto:Automation,cb:TT->Void) -> self.duoply(auto,(t) -> cb(fn(t))));
+    return Recall.Anon((auto:Automation,cb:TT->Void) -> self.duoply(auto,(t) -> cb(fn(t))));
   }
   public function attempt<R,Z,E>(fn:R->Outcome<Z,E>,self:UIODef<R>):IODef<Z,E>{
-    return Recall.anon(
+    return Recall.Anon(
       (auto,cb) -> self.duoply(
         auto,
         (r) -> cb(fn(r))
@@ -18,15 +16,15 @@ class Destructure extends Clazz{
     return map(__.command(cb),self);
   }
   public function fmap<T,TT,E>(fn:T->UIODef<TT>,self:UIODef<T>):UIODef<TT>{
-    return Recall.anon(
-      function(auto:Automation,cbTT:TT->Void):Automation { return Interim(
-        Reactor.inj().into((cbA:AutomationT->Void) -> {
+    return Recall.Anon(
+      function(auto:Automation,cbTT:TT->Void):Automation { return Automation.interim(
+        Reactor.into((cbA:AutomationDef->Void) -> {
           var trigger_auto                 
                      = Future.trigger();
           var trigger_value                           = Future.trigger();
           var future_auto : Future<Automation>        = trigger_auto.asFuture();
           var future_value                            = trigger_value.asFuture();
-          var error                                   = (e) -> Default(__.fault().of(UnknownAutomationError(e)));
+          var error                                   = (e) -> Automation.failure(__.fault().of(E_UnknownAutomation(e)));
 
               future_auto.flatMap(
                 (auto0:Automation) -> future_value.map(tuple2.bind(auto0))

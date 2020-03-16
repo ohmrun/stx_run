@@ -13,16 +13,16 @@ class Anon extends Base{
 
   var _cleanup : Block;
 
-  override function doPursue() {
+  override function do_pursue() {
     this._pursue();
-    return super.doPursue();
+    return super.do_pursue();
   }
-  override function doEscape() {
+  override function do_escape() {
     this._escape();
-    super.doEscape();
+    super.do_escape();
   }
-  override function doCleanup() {
+  override function do_cleanup() {
     this._cleanup();
-    super.doCleanup();
+    super.do_cleanup();
   }
 }

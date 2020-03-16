@@ -1,6 +1,8 @@
 import utest.UTest;
 import utest.Runner;
-import stx.run.Package;
+
+
+using  stx.run.Pack;
 
 import stx.run.test.*;
 
@@ -9,12 +11,15 @@ using stx.ds.Lift;
 
 class Main {
 	static function main() {
+		trace("MAIN");
 		UTest.run(
 			[
 				new SubmitTest(),
+				new ReceiverTest(),
 				new TaskTest(),
-				new ReceiverTest()
+				new TaskAdvancedTest(),
 			].ds()
+			 //.prj()
 			 .last()
 			 .array()
 		);
