@@ -4,5 +4,5 @@ enum TickSum{
   Exit;
   Poll(milliseconds:Float);
   Busy;
-  Fail(e:TypedError<Dynamic>);
+  Fail(e:Err<Dynamic>);
 }

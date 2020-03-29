@@ -21,10 +21,10 @@ typedef Reactor<T>            = stx.run.pack.Reactor<T>;
 typedef ReceiverDef<T>        = RecallDef<Noise,T,Automation>;
 typedef Receiver<O>           = stx.run.pack.Receiver<O>;
 
-typedef WaiterDef<T,E>        = RecallDef<Noise,Outcome<T,E>,Automation>;
+typedef WaiterDef<T,E>        = RecallDef<Noise,Res<T,E>,Automation>;
 typedef Waiter<R,E>           = stx.run.pack.Waiter<R,E>;
 
-typedef IODef<T,E>            = RecallDef<Automation,Outcome<T,E>,Automation>;
+typedef IODef<T,E>            = RecallDef<Automation,Res<T,E>,Automation>;
 typedef IO<T,E>               = stx.run.pack.IO<T,E>;
 
 typedef UIODef<T>             = RecallDef<Automation,T,Automation>;
@@ -79,7 +79,7 @@ interface RunApi{
   public function upply(schedule:Schedule):Void; 
   public function apply(schedule:Schedule):Bang;
   
-  public function report(err:TypedError<Dynamic>):Void;
+  public function report(err:Err<Dynamic>):Void;
 
   public function asRunApi():RunApi;
 }
@@ -88,7 +88,7 @@ interface ActApi{
   public function upply(thunk:Void->Void):Void; 
   public function apply(thunk:Void->Void):Bang;
 
-  public function report(err:TypedError<Dynamic>):Void;
+  public function report(err:Err<Dynamic>):Void;
 
   public function asActApi():ActApi;
 }

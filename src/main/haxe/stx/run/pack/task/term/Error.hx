@@ -1,7 +1,7 @@
 package stx.run.pack.task.term;
 
 class Error extends Base{
-  var error : TypedError<AutomationFailure<Dynamic>>;
+  var error : Err<AutomationFailure<Dynamic>>;
   public function new(error){
     super();
     this.error = error;

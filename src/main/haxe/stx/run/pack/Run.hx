@@ -19,4 +19,5 @@ private class Constructor extends Clazz{
   }
 }
 class Destructure extends Clazz{
+  
 }

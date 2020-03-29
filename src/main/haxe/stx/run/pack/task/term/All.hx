@@ -1,6 +1,6 @@
 package stx.run.pack.task.term;
 
-import stx.ds.alias.StdArray;
+import stx.core.alias.StdArray;
 
 class All extends Base{
   var gen   : Void->Option<Task>;
@@ -31,7 +31,7 @@ class All extends Base{
         arr.push(task);
       }
     }
-    if(arr.ds().all(
+    if(arr.all(
       (x) -> switch(x.progress.data){
         case Pending  : true;
         default       : false;
@@ -39,7 +39,7 @@ class All extends Base{
     )){
       recurring = false;
     }
-    if(arr.ds().any(
+    if(arr.any(
       (x) -> switch(x.progress.data){
         case Problem(_) | Pending : true;
         default                   : false;

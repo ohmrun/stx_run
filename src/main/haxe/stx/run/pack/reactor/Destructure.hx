@@ -31,11 +31,11 @@ class Destructure extends Clazz{
     );
   }
   public function toReceiver<T>(self:Reactor<T>):Receiver<T>{
-    return Receiver.into((cont) -> {
-      return Task.Anon(self.duoply.bind(Noise,cont));
+    return Receiver.feed((cont) -> {
+      return Task.Anon(self.applyII.bind(Noise,cont));
     });
   }
   public function upply<T>(cb:T->Void,self:Reactor<T>):Void{
-    self.asRecallDef().duoply(Noise,cb);
+    self.asRecallDef().applyII(Noise,cb);
   }
 }

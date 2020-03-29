@@ -48,7 +48,7 @@ class Base implements TaskApi {
       case Problem(_) | Secured | Escaped: 
       default : 
         try f()
-          catch(e:TypedError<Dynamic>){
+          catch(e:Err<Dynamic>){
             m.release();
             var data = e.map(E_UnknownAutomation);
             switch(e.uuid){
@@ -63,7 +63,7 @@ class Base implements TaskApi {
             if (Std.string(e) == 'Stack overflow'){
               data = E_StackOverflow;
             }
-          this.progress = Progression.pure(Problem(AutomationError.make(data,None,__.fault().prj())));
+          this.progress = Progression.pure(Problem(AutomationError.make(data,None,__.here())));
           }
     }
     m.release();

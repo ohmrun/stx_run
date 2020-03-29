@@ -6,7 +6,7 @@ enum ProgressSum{
   Polling(milliseconds:Int);  
   Waiting(cb:Reactor<Noise>);
 
-  Problem(e:TypedError<AutomationFailure<Dynamic>>);
+  Problem(e:Err<AutomationFailure<Dynamic>>);
   
   Escaped;
   Secured;

@@ -6,7 +6,7 @@ class Base<I,O,R> implements RecallApi<I,O,R>{
   public function new(){
     
   }
-  public function duoply(i:I,cb:(O -> Void)):R{
+  public function applyII(i:I,cb:(O -> Void)):R{
     return throw __.fault().of(E_AbstractMethod);
   }
 

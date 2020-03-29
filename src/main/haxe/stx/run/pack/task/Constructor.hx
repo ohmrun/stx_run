@@ -27,7 +27,7 @@ class Constructor extends Clazz{
       )
     );
   }
-  public function fromError(err:TypedError<AutomationFailure<Dynamic>>):Task{
+  public function fromError(err:Err<AutomationFailure<Dynamic>>):Task{
     return new Error(err);
   }
   public function unit():Task{

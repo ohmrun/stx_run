@@ -1,6 +1,6 @@
 package stx.run.pack.task.term;
 
-import stx.ds.alias.StdArray;
+import stx.core.alias.StdArray;
 
 class Seq extends Base{
   var gen : Void->Option<Task>;
@@ -12,7 +12,7 @@ class Seq extends Base{
     super();
   }
   override public function do_pursue(){
-    var last = arr.ds().last();
+    var last = arr.last();
     return last.fold(
       (task:Task) -> 
         task.ongoing.if_else(

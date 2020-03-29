@@ -7,7 +7,7 @@ class Lift{
   static public function toVoid<I,O>(rc:RecallDef<I,O,Noise>):RecallDef<I,O,Void>{
     return Recall.Anon(
       function (i:I,cont:Sink<O>):Void {
-        rc.duoply(i,cont);
+        rc.applyII(i,cont);
       }
     );
   }

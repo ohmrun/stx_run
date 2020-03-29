@@ -20,7 +20,7 @@ class Base implements ActApi{
     );
     return Bang._().fromFuture(ft.snd());
   }
-  public function report(e:TypedError<Dynamic>):Void{
+  public function report(e:Err<Dynamic>):Void{
     Act.MainThread().upply(
       () -> {
         throw(e);

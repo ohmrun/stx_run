@@ -23,13 +23,13 @@ class Constructor extends Clazz{
       }
     );
   }
-  public function fromOptionThunk<E>(thk:Thunk<Option<TypedError<E>>>):EIO<E>{
+  public function fromOptionThunk<E>(thk:Thunk<Option<Err<E>>>):EIO<E>{
     return fromThunk(thk.then(_ -> new Report(_)) );
   }
   public function fromThunk<E>(thk:Thunk<Report<E>>):EIO<E>{
     return into((handler) -> handler(thk()));
   }
-  public function fromOption<E>(opt:Option<TypedError<E>>):EIO<E>{
+  public function fromOption<E>(opt:Option<Err<E>>):EIO<E>{
     return fromOptionThunk(()->opt);
   }
   public function pure<E>(report:Report<E>):EIO<E>{

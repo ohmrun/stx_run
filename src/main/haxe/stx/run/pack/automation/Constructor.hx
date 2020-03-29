@@ -26,13 +26,13 @@ package stx.run.pack.automation;
       )
     );
   }
-  public function failure(err:TypedError<AutomationFailure<Dynamic>>):Automation{
+  public function failure(err:Err<AutomationFailure<Dynamic>>):Automation{
     return into((cb) -> cb(Right(Report.pure(err))));
   }
   public function interim(thk:ReactorDef<Automation>):Automation{
-    return into((cb) -> thk.duoply(Noise,(auto) -> cb(Left(auto))));
+    return into((cb) -> thk.applyII(Noise,(auto) -> cb(Left(auto))));
   }
-  inline public function execute<E>(thk:Void->Option<TypedError<E>>):Automation{
+  inline public function execute<E>(thk:Void->Option<Err<E>>):Automation{
     var fn : Noise -> Automation = ((_:Noise) -> switch(thk()){
       case Some(err) : failure(__.fault().of(E_Automation(err)));
       case None      : Automation.unit();

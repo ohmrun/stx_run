@@ -15,7 +15,8 @@ class Destructure extends Clazz{
   public function snoc(task:Task,self:Automation):Automation{
     return Task.Seq([self,task].toIter().toGenerator());
   }
-  function run(self:Automation,?sync=false,?limit){
+  function run(self:Automation,?limit){
+
     var schedule = Schedule.Task(self);
 
     Run.unit().upply(schedule);
@@ -24,12 +25,6 @@ class Destructure extends Clazz{
     Submit the Automation to Run;
   **/
   public function submit(self:Automation,?limit){
-    this.run(self,false,limit);
+    this.run(self,limit);
   }
-  /**
-    Run the Automation inline;
-  **/
-  // public function crunch(self:Automation,?limit){
-  //   this.run(self,true,limit);
-  // }  
 }   

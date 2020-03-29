@@ -24,9 +24,9 @@ class Destructure extends Clazz{
             var value_future  = value_trigger.asFuture();
 
                 auto_future.flatMap(
-                  (auto) -> value_future.map(tuple2.bind(auto))
+                  (auto) -> value_future.map(__.couple.bind(auto))
                 ).map(
-                  __.into2((auto,value) -> fn(value).apply(cbTT))
+                  __.decouple((auto,value) -> fn(value).apply(cbTT))
                 ).handle(
                   (auto1) -> cbA(auto1)
                 );
@@ -41,7 +41,7 @@ class Destructure extends Clazz{
     );
   }
   public function apply<T>(cb:T->Void,self:Receiver<T>):Automation{
-    return self.duoply(Noise,cb);
+    return self.applyII(Noise,cb);
   }
   public function toUIO<T>(self:Receiver<T>):UIODef<T>{
     return Recall.Anon(

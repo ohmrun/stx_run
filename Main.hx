@@ -6,7 +6,7 @@ using  stx.run.Pack;
 
 import stx.run.test.*;
 
-using stx.core.Lift;
+using stx.Core;
 using stx.ds.Lift;
 
 class Main {
@@ -18,8 +18,7 @@ class Main {
 				new ReceiverTest(),
 				new TaskTest(),
 				new TaskAdvancedTest(),
-			].ds()
-			 //.prj()
+			]
 			 .last()
 			 .array()
 		);
