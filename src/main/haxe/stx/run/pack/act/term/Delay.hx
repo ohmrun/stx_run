@@ -7,10 +7,10 @@ class Delay extends Base{
     this.milliseconds = milliseconds;
   }
   override public function upply(thk){
-    Run._().unit().upply(
+    Run.unit().upply(
       Schedule.Task(
         Task.Timeout(milliseconds).seq(
-          Task._().Anon(thk)
+          Task.Anon(thk)
         )
       )
     );

@@ -4,21 +4,21 @@ package stx.run.pack;
 @:forward abstract UIO<T>(UIODef<T>) from UIODef<T> to UIODef<T>{
   static public var _(default,never) = UIOLift;
   
-  public function feed<T>(handler:(T->Void)->Automation):UIO<T>{
+  static public function feed<T>(handler:(T->Void)->Automation):UIO<T>{
     return Recall.Anon((auto:Automation,cb:T->Void) -> auto.snoc(handler(cb)));
   }
-  public function into<T>(handler:(T->Void)->Void):UIO<T>{
+  static public function into<T>(handler:(T->Void)->Void):UIO<T>{
     return feed(
       (cb) -> { handler(cb); return Automation.unit(); }
     );
   }
-  public function fromFuture<T>(v:Future<T>):UIO<T>{
+  static public function fromFuture<T>(v:Future<T>):UIO<T>{
     return Receiver.fromFuture(v).toUIO();
   }
-  public function fromThunk<T>(v:Thunk<T>):UIO<T>{
+  static public function fromThunk<T>(v:Thunk<T>):UIO<T>{
     return into((cb) -> cb(v()));
   }
-  public function fromReceiverDef<T>(fn:(T->Void)->Automation):UIO<T>{
+  static public function fromReceiverDef<T>(fn:(T->Void)->Automation):UIO<T>{
     return feed((cb) -> fn(cb));
   }
 
@@ -28,10 +28,10 @@ package stx.run.pack;
 }
 
 class UIOLift extends Clazz{
-  public function map<T,TT>(self:UIO<T>,fn:T->TT):UIODef<TT>{
+  static public function map<T,TT>(self:UIO<T>,fn:T->TT):UIODef<TT>{
     return Recall.Anon((auto:Automation,cb:TT->Void) -> self.applyII(auto,(t) -> cb(fn(t))));
   }
-  public function attempt<T,TT,E>(self:UIODef<T>,fn:T->Res<TT,E>):IODef<TT,E>{
+  static public function attempt<T,TT,E>(self:UIODef<T>,fn:T->Res<TT,E>):IODef<TT,E>{
     return Recall.Anon(
       (auto,cb) -> self.applyII(
         auto,
@@ -39,10 +39,10 @@ class UIOLift extends Clazz{
       )
     );
   }
-  public function command<T>(self:UIO<T>,cb:T->Void):UIODef<T>{
-    return map(__.command(cb),self);
+  static public function command<T>(self:UIO<T>,cb:T->Void):UIODef<T>{
+    return map(self,__.command(cb));
   }
-  public function fmap<T,TT,E>(self:UIO<T>,fn:T->UIODef<TT>):UIODef<TT>{
+  static public function flat_map<T,TT,E>(self:UIO<T>,fn:T->UIODef<TT>):UIODef<TT>{
     return Recall.Anon(
       function(auto:Automation,cbTT:TT->Void):Automation { return Automation.interim(
         Reactor.into((cbA:AutomationDef->Void) -> {

@@ -80,7 +80,7 @@ class Deferred extends Base{
       }
     }else{
       __.log().close().trace('cont');
-      if(__.assert().alike().ok(Waiting(null),new EnumValue(this.progress.data).prj())){
+      if(__.that().alike().ok(Waiting(null),new EnumValue(this.progress.data).prj())){
         if(arrived){
           doDelegate();
         }else{
@@ -88,7 +88,7 @@ class Deferred extends Base{
           poll.roll();
           this.progress = Progression.pure(Polling(poll.delta));
         }
-      }else if(__.assert().alike().ok(Polling(null),this.progress.data)){
+      }else if(__.that().alike().ok(Polling(null),this.progress.data)){
         if(arrived){
           doDelegate();
         }else{

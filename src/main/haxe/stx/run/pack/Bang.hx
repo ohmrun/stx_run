@@ -1,8 +1,22 @@
 package stx.run.pack;
 
-@:using(stx.run.pack.bang.Implementation)
 @:forward abstract Bang(BangDef) from BangDef to BangDef {
-  static public inline function _() return stx.run.pack.bang.Constructor.ZERO;
-
-  public function perform(fn) _()._.perform(fn,this);
+  static public function unit():Bang{
+    return Reactor.into(
+      (handler) -> handler(Noise)
+    ).asRecallDef();
+  }
+  static public function fromFuture(ft:Future<Noise>):Bang{
+    return Recall.Anon(
+      (_:Noise,cb) -> ft.handle(cb)
+    );
+  }
+  public function perform(self:Bang,fn:Void->Void):Bang{
+    return Recall.Anon(
+      (_:Noise,cb:Noise->Void) -> {
+        fn();
+        cb(Noise);
+      }
+    );
+  }
 }

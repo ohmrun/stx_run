@@ -1,6 +1,6 @@
 package stx.run.pack.recall.term;
 
-@:using(stx.run.pack.recall.Implementation)
+@:using(stx.run.pack.Recall.RecallLift)
 class Base<I,O,R> implements RecallApi<I,O,R>{
   
   public function new(){

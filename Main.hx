@@ -2,12 +2,11 @@ import utest.UTest;
 import utest.Runner;
 
 
-using  stx.run.Pack;
+using  stx.Run;
 
 import stx.run.test.*;
 
 using stx.Core;
-using stx.ds.Lift;
 
 class Main {
 	static function main() {
@@ -20,7 +19,7 @@ class Main {
 				new TaskAdvancedTest(),
 			]
 			 .last()
-			 .array()
+			 .toArray()
 		);
 	}
 }

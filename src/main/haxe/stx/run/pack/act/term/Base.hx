@@ -18,7 +18,7 @@ class Base implements ActApi{
         ft.fst().trigger(Noise);
       }
     );
-    return Bang._().fromFuture(ft.snd());
+    return Bang.fromFuture(ft.snd());
   }
   public function report(e:Err<Dynamic>):Void{
     Act.MainThread().upply(

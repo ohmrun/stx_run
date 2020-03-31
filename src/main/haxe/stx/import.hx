@@ -1,4 +1,4 @@
-package stx.run;
+package stx;
 
 //import tink.priority
 import tink.CoreApi;
@@ -10,4 +10,4 @@ using stx.Log;
 using stx.Convention;
 using stx.Std;
 
-using stx.run.Pack;
+using stx.Run;

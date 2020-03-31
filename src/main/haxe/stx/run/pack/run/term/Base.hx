@@ -25,7 +25,7 @@ class Base implements RunApi{
         return out;
       }
     );
-    return Bang._().fromFuture(ft.snd());
+    return Bang.fromFuture(ft.snd());
   }
   private function close(){
     __.log().close().trace("BASE::CLOSE");

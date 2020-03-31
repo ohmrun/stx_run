@@ -1,9 +1,10 @@
 package stx.run.pack.task.term;
 
+using Lambda;
 import stx.core.alias.StdArray;
 
 class Seq extends Base{
-  var gen : Void->Option<Task>;
+  var gen : Iterator<Task>;
   var arr : StdArray<Task>;
 
   public function new(gen){
@@ -28,7 +29,7 @@ class Seq extends Base{
               this.escape();
               false;
             case Secured    :
-              gen().fold(
+              generate(gen).fold(
                 (next) -> {
                   arr.push(next);
                   true;
@@ -42,7 +43,7 @@ class Seq extends Base{
               true;
           }
         ),
-        () -> gen().fold(
+        () -> generate(gen).fold(
           (task) -> {
             arr.push(task);
             true;
@@ -54,11 +55,18 @@ class Seq extends Base{
         )
     );
   }
+  function generate<T>(iterator:Iterator<T>):Option<T>{
+    return if(iterator.hasNext()){
+      Some(iterator.next());
+    }else{
+      None;
+    }
+  }
   override public function do_escape(){
     
   }
   override public function do_cleanup(){
-    this.gen = () -> None;
+    this.gen = [].iterator();
     this.arr = [];
   }
 }

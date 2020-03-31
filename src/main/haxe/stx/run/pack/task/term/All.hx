@@ -3,11 +3,11 @@ package stx.run.pack.task.term;
 import stx.core.alias.StdArray;
 
 class All extends Base{
-  var gen   : Void->Option<Task>;
+  var gen   : Iterator<Task>;
   var arr   : StdArray<Task>;
   var init  : Bool;
 
-  public function new(gen:Void->Option<Task>){
+  public function new(gen:Iterator<Task>){
     this.gen  = gen;
     this.arr  = [];
     this.init = false;
@@ -19,14 +19,14 @@ class All extends Base{
     }
   }
   override public function do_cleanup(){
-    this.gen = () -> None;
+    this.gen = [].iterator();
     this.arr = [];
   }
   override public function do_pursue(){
     var recurring = true;
     if(!init){
       init = true;
-      for(task in Generator.yielding(gen)){
+      for(task in gen){
         task.pursue();
         arr.push(task);
       }
