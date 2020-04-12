@@ -22,32 +22,52 @@ class All extends Base{
     this.gen = [].iterator();
     this.arr = [];
   }
+  
   override public function do_pursue(){
     var recurring = true;
     if(!init){
       init = true;
       for(task in gen){
-        task.pursue();
         arr.push(task);
       }
     }
-    if(arr.all(
-      (x) -> switch(x.progress.data){
-        case Pending  : true;
-        default       : false;
+    var partition = arr.partition(
+      (task) -> switch(task.progress.data){
+        case Problem(e) : true;
+        default         : false;
       }
-    )){
-      recurring = false;
-    }
-    if(arr.any(
-      (x) -> switch(x.progress.data){
-        case Problem(_) | Pending : true;
-        default                   : false;
+    );
+    __.log().close().trace(partition);
+    return if(partition.a.is_defined()){
+      this.progress = Progression.pure(
+        Problem(partition.a.lfold(
+          (next:Task,memo:Option<Err<AutomationFailure<Dynamic>>>) -> next.progress.error().flat_map(
+            (e) -> memo.map(
+              (e2) -> e2.next(e)
+            )
+          ),
+          None
+        ).defv(__.fault().of(E_NoValueFound)))
+      );
+      for(task in partition.b){
+        task.escape();
       }
-    )){
-      recurring = false;
-      this.escape();
+      false;
+    }else{
+      for(task in arr){
+        task.pursue();
+        if(task.progress.error().is_defined()){
+          return true;
+        }
+      }
+      this.progress = Progression.pure(partition.b.lfold1(
+        (next:Task,memo:Task) -> memo.progress.is_less_than(next.progress) ? memo : next
+      ).map( t -> t.progress.data ).defv(Problem(__.fault().of(E_NoValueFound))));
+
+      switch(progress.data){
+        case Pending | Polling(_) | Waiting(_) : true;
+        default : false;
+      }
     }
-    return recurring;
   }
 }

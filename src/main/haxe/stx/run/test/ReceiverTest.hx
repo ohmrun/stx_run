@@ -13,7 +13,7 @@ class ReceiverTest extends utest.Test{
     );
     receiver.apply((_)->{});
     receiver.apply((_)->{});
-    Assert.equals(1,n);
+    Rig.equals(1,n);
   }
   //@Ignored
   public function test_async0(async:utest.Async){
@@ -22,7 +22,7 @@ class ReceiverTest extends utest.Test{
       (cb) -> {
         __.log().close().trace('callback called');
         cb(Noise);
-        Assert.pass();
+        Rig.pass();
         async.done();
       }
     );
@@ -42,7 +42,7 @@ class ReceiverTest extends utest.Test{
     );
     //receiver((_)->{});
     Act.Defer().upply(receiver.apply.bind((_)->{
-      Assert.pass();
+      Rig.pass();
       async.done();
     }));
   }

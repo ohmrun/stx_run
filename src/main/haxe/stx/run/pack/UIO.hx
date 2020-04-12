@@ -5,7 +5,7 @@ package stx.run.pack;
   static public var _(default,never) = UIOLift;
   
   static public function feed<T>(handler:(T->Void)->Automation):UIO<T>{
-    return Recall.Anon((auto:Automation,cb:T->Void) -> auto.snoc(handler(cb)));
+    return Recall.Anon((auto:Automation,cb:T->Void) -> auto.snoc(Task.Anon(handler.bind(cb))));
   }
   static public function into<T>(handler:(T->Void)->Void):UIO<T>{
     return feed(
@@ -25,24 +25,33 @@ package stx.run.pack;
   @:to public function toIO():IO<T,Dynamic>{
     return IO.fromUIODef(this);
   }
-}
 
-class UIOLift extends Clazz{
-  static public function map<T,TT>(self:UIO<T>,fn:T->TT):UIODef<TT>{
-    return Recall.Anon((auto:Automation,cb:TT->Void) -> self.applyII(auto,(t) -> cb(fn(t))));
-  }
-  static public function attempt<T,TT,E>(self:UIODef<T>,fn:T->Res<TT,E>):IODef<TT,E>{
+  // static public function attempt<T,TT,E>(self:UIODef<T>,fn:T->Res<TT,E>):IODef<TT,E>{
+  //   return Recall.Anon(
+  //     (auto,cb) -> self.applyII(
+  //       auto,
+  //       (r) -> cb(fn(r))
+  //     )
+  //   );
+  // }
+  public function attempt<TT,E>(fn:T->Res<TT,E>):IO<TT,E>{
     return Recall.Anon(
-      (auto,cb) -> self.applyII(
+      (auto,cb) -> this.applyII(
         auto,
         (r) -> cb(fn(r))
       )
     );
   }
-  static public function command<T>(self:UIO<T>,cb:T->Void):UIODef<T>{
+}
+
+class UIOLift extends Clazz{
+  static public function map<T,TT>(self:UIO<T>,fn:T->TT):UIO<TT>{
+    return Recall.Anon((auto:Automation,cb:TT->Void) -> self.applyII(auto,(t) -> cb(fn(t))));
+  }
+  static public function command<T>(self:UIO<T>,cb:T->Void):UIO<T>{
     return map(self,__.command(cb));
   }
-  static public function flat_map<T,TT,E>(self:UIO<T>,fn:T->UIODef<TT>):UIODef<TT>{
+  static public function flat_map<T,TT,E>(self:UIO<T>,fn:T->UIO<TT>):UIO<TT>{
     return Recall.Anon(
       function(auto:Automation,cbTT:TT->Void):Automation { return Automation.interim(
         Reactor.into((cbA:AutomationDef->Void) -> {

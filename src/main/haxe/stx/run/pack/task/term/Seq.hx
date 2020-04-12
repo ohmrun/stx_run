@@ -13,12 +13,14 @@ class Seq extends Base{
     super();
   }
   override public function do_pursue(){
+    __.log().close().trace('Seq#do_pursue');
     var last = arr.last();
     return last.fold(
       (task:Task) -> 
         task.ongoing.if_else(
           () -> {
             task.pursue();
+            progression(task.progress.data);
             true;
           },
           () -> switch(task.progress.data){

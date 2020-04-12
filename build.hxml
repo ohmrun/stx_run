@@ -1,5 +1,6 @@
 -cp src/main/haxe
 
+-lib tink_priority 
 -lib tink_core
 -lib tink_concurrent
 -lib utest
@@ -10,7 +11,7 @@
 -lib stx_fn
 -lib stx_log
 -lib stx_fp
--lib stx_convention
+
 -lib stx_assert
 
 -lib min-max

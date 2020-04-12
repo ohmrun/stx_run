@@ -3,8 +3,46 @@ package stx;
 class Pack{
   
 }
-typedef Recall<I,O,R>         = stx.run.pack.Recall<I,O,R>;
+class AnonAsyncApi<P,O,E> extends AsyncApi<P,O,E>{
+  var _applyII : P->Terminal<O,E>->Response<E>;
+  public function new(_applyII){
+    super();
+    this._applyII = _applyII;
+  }
+  override private function doApplyII(p:P,t:Terminal<O,E>):Response<E>{
+    return _applyII(p,t);
+  }
+}
+class AsyncApi<P,O,E>{
+	//public var open(default,null):Bool = false;
+	public function new(){
 
+	}
+	public function applyII(p:P,t:Terminal<O,E>):Response<E>{
+		var output = doApplyII(p,t);
+		// if(!t.ready){
+		// 	throw 'use the terminal before returning from function';
+		// }
+		return output;
+	}
+	private function doApplyII(p:P,t:Terminal<O,E>):Response<E>{
+		var err : Err<AutomationFailure<E>> = __.fault().err(E_AbstractMethod);
+		return t.error(err);
+  }
+  public function asAsyncDef():AsyncDef<P,O,E>{
+    return this;
+  }
+}
+typedef AsyncDef<P,O,E>       = {
+  public function applyII(p:P,t:Terminal<O,E>):Response<E>;
+  public function asAsyncDef():AsyncDef<P,O,E>;
+}
+abstract Async<P,O,E>(AsyncDef<P,O,E>) from AsyncDef<P,O,E> to AsyncDef<P,O,E>{
+  static public function Anon<P,O,E>(fn:P->Terminal<O,E>->Response<E>){
+    return new AnonAsyncApi(fn);
+  }
+}
+typedef Recall<I,O,R>         = stx.run.pack.Recall<I,O,R>;
 typedef RecallDef<I,O,R>  = {
   public function applyII(i:I,cb:Sink<O>):R;
   public function asRecallDef():RecallDef<I,O,R>;
@@ -24,8 +62,8 @@ typedef TaskOp                    = TaskOpSum;
 typedef LimitDef = {
   @:optional var unchanged : Int;//how many times can the progression be unchanged before bailing out.
 
-  @:optional var duration  : Int;//milliseconds how long can this process take in total ''.
-  @:optional var hanging   : Int;//milliseconds how long can the progression be unchanged ''.
+  @:optional var duration  : MilliSeconds;//milliseconds how long can this process take in total ''.
+  @:optional var hanging   : MilliSeconds;//milliseconds how long can the progression be unchanged ''.
 }
 typedef Limit                 = LimitDef;
 
@@ -35,22 +73,22 @@ typedef Bang                  = stx.run.pack.Bang;
 typedef ReactorDef<T>         = RecallDef<Noise,T,Void>;
 typedef Reactor<T>            = stx.run.pack.Reactor<T>;
 
-typedef ReceiverDef<T>        = RecallDef<Noise,T,Automation>;
-typedef Receiver<O>           = stx.run.pack.Receiver<O>;
+//typedef ReceiverDef<T>        = RecallDef<Noise,T,Automation>;
+//typedef Receiver<O>           = stx.run.pack.Receiver<O>;
 
-typedef WaiterDef<T,E>        = RecallDef<Noise,Res<T,E>,Automation>;
-typedef Waiter<R,E>           = stx.run.pack.Waiter<R,E>;
+//typedef WaiterDef<T,E>        = RecallDef<Noise,Res<T,E>,Automation>;
+//typedef Waiter<R,E>           = stx.run.pack.Waiter<R,E>;
 
-typedef IODef<T,E>            = RecallDef<Automation,Res<T,E>,Automation>;
-typedef IO<T,E>               = stx.run.pack.IO<T,E>;
+//typedef IODef<T,E>            = RecallDef<Automation,Res<T,E>,Automation>;
+//typedef IO<T,E>               = stx.run.pack.IO<T,E>;
 
-typedef UIODef<T>             = RecallDef<Automation,T,Automation>;
-typedef UIO<T>                = stx.run.pack.UIO<T>;
+//typedef UIODef<T>             = RecallDef<Automation,T,Automation>;
+//typedef UIO<T>                = stx.run.pack.UIO<T>;
 
-typedef EIODef<E>             = RecallDef<Automation,Report<E>,Automation>;
-typedef EIO<E>                = stx.run.pack.EIO<E>;
+//typedef EIODef<E>             = RecallDef<Automation,Report<E>,Automation>;
+//typedef EIO<E>                = stx.run.pack.EIO<E>;
 
-typedef AutomationDef         = Task;
+typedef AutomationDef         = stx.run.pack.Automation.AutomationDef;
 typedef Automation            = stx.run.pack.Automation;
 
 typedef AutomationError       = stx.run.pack.AutomationError;
@@ -64,31 +102,26 @@ typedef Task                  = stx.run.pack.Task;
 typedef Profile               = stx.run.pack.Profile;
 //typedef Spinner               = stx.run.pack.Spinner;
 
-enum ProgressSum{
-  Pending;
+typedef Progress              = stx.run.pack.Progress;
+typedef ProgressSum           = stx.run.pack.Progress.ProgressSum;
 
-  Polling(milliseconds:Int);  
-  Waiting(cb:Reactor<Noise>);
-
-  Problem(e:Err<AutomationFailure<Dynamic>>);
-  
-  Escaped;
-  Secured;
-}
 typedef Progression           = stx.run.pack.Progression;
 
 
-typedef LiftRecallDef         = stx.run.pack.Recall.RecallLift;
-typedef LiftReactorDef        = stx.run.pack.Reactor.ReactorLift;
-typedef LiftReceiverDef       = stx.run.pack.Receiver.ReceiverLift;
-typedef LiftWaiterDef         = stx.run.pack.Waiter.WaiterLift;
-typedef LiftEIODef            = stx.run.pack.EIO.EIOLift;
-typedef LiftUIODef            = stx.run.pack.UIO.UIOLift;
-typedef LiftIODef             = stx.run.pack.IO.IOLift;
+//typedef LiftRecallDef         = stx.run.pack.Recall.RecallLift;
+//typedef LiftReactorDef        = stx.run.pack.Reactor.ReactorLift;
+//typedef LiftReceiverDef       = stx.run.pack.Receiver.ReceiverLift;
+//typedef LiftWaiterDef         = stx.run.pack.Waiter.WaiterLift;
+//typedef LiftEIODef            = stx.run.pack.EIO.EIOLift;
+//typedef LiftUIODef            = stx.run.pack.UIO.UIOLift;
+//typedef LiftIODef             = stx.run.pack.IO.IOLift;
 
 class LiftRun{
   static public function run(__:Wildcard):Module{
     return new stx.run.pack.Module();
+  }
+  static public function timer(__:Wildcard){
+    return Timer.unit();
   }
   static public function toVoid<I,O>(rc:RecallDef<I,O,Noise>):RecallDef<I,O,Void>{
     return Recall.Anon(
@@ -98,41 +131,37 @@ class LiftRun{
     );
   }
 }
-typedef LiftThunkToUIO        = stx.run.lift.LiftThunkToUIO;
-typedef LiftIO                = stx.run.lift.LiftIO;
+//typedef LiftThunkToUIO        = stx.run.lift.LiftThunkToUIO;
+//typedef LiftIO                = stx.run.lift.LiftIO;
 
 typedef Module                = stx.run.pack.Module;
 
-enum TickSum{
-  Exit;
-  Poll(milliseconds:Float);
-  Busy;
-  Fail(e:Err<Dynamic>);
-}
-typedef Tick                  = TickSum;
+typedef Next                  = stx.run.pack.Next;
+typedef NextSum               = stx.run.pack.Next.NextSum;
 
-interface ScheduleApi{
-  public function reply():Tick;
-  public function asScheduleApi():ScheduleApi;
-}
+
+typedef ScheduleApi           = stx.run.pack.Schedule.ScheduleApi;
 typedef Schedule              = stx.run.pack.Schedule;
 
-typedef Run                   = stx.run.pack.Run;
-interface RunApi{
-  public function upply(schedule:Schedule):Void; 
-  public function apply(schedule:Schedule):Bang;
-  
-  public function report(err:Err<Dynamic>):Void;
+typedef SchedulerApi          = stx.run.pack.Scheduler.SchedulerApi;
+typedef Scheduler             = stx.run.pack.Scheduler;
 
-  public function asRunApi():RunApi;
-}
+
 
 interface ActApi{
   public function upply(thunk:Void->Void):Void; 
-  public function apply(thunk:Void->Void):Bang;
+  public function reply():Bang;
 
   public function report(err:Err<Dynamic>):Void;
 
   public function asActApi():ActApi;
 }
 typedef Act                   = stx.run.pack.Act;
+typedef Timer                 = stx.run.pack.Timer;
+
+typedef Terminal<O,E>         = stx.run.pack.Terminal<O,E>;
+typedef Response<E>           = stx.run.pack.Response<E>;
+
+typedef Seconds               = stx.run.pack.Seconds;
+typedef MilliSeconds          = stx.run.pack.MilliSeconds;
+typedef Runtime               = stx.run.pack.Runtime;

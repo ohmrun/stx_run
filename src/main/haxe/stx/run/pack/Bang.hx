@@ -11,11 +11,17 @@ package stx.run.pack;
       (_:Noise,cb) -> ft.handle(cb)
     );
   }
-  public function perform(self:Bang,fn:Void->Void):Bang{
+  public function stage(before:Void->Void,after:Void->Void):Bang{
     return Recall.Anon(
       (_:Noise,cb:Noise->Void) -> {
-        fn();
-        cb(Noise);
+        before();
+        this.applyII(
+          Noise,
+          (_) -> {
+            cb(Noise);
+            after();
+          }
+        );
       }
     );
   }

@@ -26,7 +26,7 @@ package stx.run.pack;
     return feed(
       (cb) -> {
         var canceller = ft.handle(cb);
-        return Task.Anon(null,canceller.cancel).toAutomation();
+        return Automation.pure(Task.Anon(null,canceller.cancel));
       }
     );
   }
@@ -81,7 +81,7 @@ class ReceiverLift{
   }
   static public function toUIO<T>(self:Receiver<T>):UIODef<T>{
     return Recall.Anon(
-      (auto:Automation,cb:T->Void) -> auto.snoc(self.apply(cb))
+      (auto:Automation,cb:T->Void) -> auto.concat(self.apply(cb))
     );
   }
 }

@@ -70,7 +70,7 @@ class ReactorLift extends Clazz{
   }
   static public function toReceiver<T>(self:Reactor<T>):Receiver<T>{
     return Receiver.feed((cont) -> {
-      return Task.Anon(self.applyII.bind(Noise,cont));
+      return Automation.pure(Task.Anon(self.applyII.bind(Noise,cont)));
     });
   }
   static public function upply<T>(self:Reactor<T>,cb:T->Void):Void{

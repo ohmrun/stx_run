@@ -6,7 +6,7 @@ import tink.concurrent.Mutex;
 /**
   Shamelessly pilferred from tink.
 **/
-class Base implements TaskApi {
+class Base implements TaskApi extends Clazz{
   /**
    * Locks are generally not the best idea. Given the intended life cycle of a task,
    * this should not be an issue. Since the `pursue` or `cancel` method of a single `Task` are 
@@ -19,17 +19,10 @@ class Base implements TaskApi {
     public function get_progress() return progress;
     public function set_progress(progress:Progression) return this.progress = progress;
   
-  public var working(get,null): Bool;
-  public function get_working():Bool{
-    return switch(progress.data){
-      case Pending | Polling(_) | Waiting(_) : true;
-      default : false;
-    }
-  }
   public var ongoing(get,null): Bool;
   public function get_ongoing():Bool{
     return switch(progress.data){
-      case Pending | Polling(_) | Waiting(_) : true;
+      case Pending | Polling(_) | Waiting(_) | Working : true;
       default : false;
     }
   }
@@ -45,7 +38,7 @@ class Base implements TaskApi {
     if (!m.tryAcquire()) return;
     
     switch(progress.data){
-      case Problem(_) | Secured | Escaped: 
+      case Problem(_) | Secured | Escaped : 
       default : 
         try f()
           catch(e:Err<Dynamic>){
@@ -73,7 +66,7 @@ class Base implements TaskApi {
     exec(function () {
       var cont = do_pursue();  
       if(cont == true){
-        if(!ongoing){
+        if(!ongoing && !progress.data.prj().match(Pending)){
           progress = Progression.pure(Pending);
         }
       }else{
@@ -86,8 +79,11 @@ class Base implements TaskApi {
       }
     });
   
+  public var rtid(default,null): Void->Void;
   public function new() {
+    super();
     this.progress   = Progression.pure(Pending);
+    this.rtid       = () -> {};
     this.m          = new Mutex();
   }
   
@@ -98,38 +94,12 @@ class Base implements TaskApi {
   
   function do_cleanup() {}
 
-  public inline function definition(){
-    return std.Type.getClass(this);
-  }  
-  public inline function name(){
-    return std.Type.getClassName(definition());
-  }  
   public var uuid(default,null) : String = __.uuid();
 
   public function asTaskApi():TaskApi{
     return this;
   }
-  public function toDeferred():TaskApi{
-    return new Deferred(
-      Reactor.into(
-        (cb) -> cb(this.asTaskApi())
-      )
-    ).asTaskApi();
-  }
-  function post(progress){
-    return switch(progress.data){
-      case Pending      : true;
-      case Polling(_)   : true;
-      case Waiting(cb)  : false;
-      case Problem(e)   : false;
-      case Escaped      : false;
-      case Secured      : false;
-    }
-  }
   private function progression(progress){
     this.progress = Progression.pure(progress);
-  }
-  public function toSchedule(){
-    return new stx.run.pack.schedule.term.Task(this).asScheduleApi();
   }
 }

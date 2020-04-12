@@ -2,13 +2,17 @@ package stx.run.pack;
 
 @:using(stx.run.pack.IO.IOLift)
 @:forward abstract IO<O,E>(IODef<O,E>) from IODef<O,E> to IODef<O,E>{
+  public function new(self) this = self;
+  static public function lift<O,E>(self:IODef<O,E>):IO<O,E>{
+    return new IO(self);
+  }
   static public inline function pure<O>(v:O):IO<O,Noise>{
     return fromFunXR(() -> v);
   }
   static public function feed<O,E>(handler:(Res<O,E>->Void)->Automation):IO<O,E>{
     return Recall.Anon(
       (auto:Automation,cont:Res<O,E>->Void) -> {
-        return auto.snoc(handler(cont));
+        return auto.snoc(Task.Anon(handler.bind(cont)));
       }
     );
   }
@@ -32,7 +36,7 @@ package stx.run.pack;
       (auto,cb) -> fn(auto,cb)
     );
   }
-  static public inline function fromFunXRes<R,E>(chk:Void -> Res<R,E>):IO<R,E>{
+  @:from static public inline function fromFunXRes<R,E>(chk:Void -> Res<R,E>):IO<R,E>{
     return call((handler) -> handler(chk()));
   }
   static public inline function fromRes<R,E>(chk:Res<R,E>):IO<R,E>{
@@ -136,10 +140,10 @@ class IOLift{
   //   );
   // }
   static public function errata<O,E,EE>(self:IO<O,E>,fn:Err<E>->Err<EE>):IO<O,EE>{
-    return UIO._.map(
+    return IO.lift(UIO._.map(
       self.prj(),
       (either:Res<O,E>) -> either.errata(fn)
-    );
+    ));
   }
   static public function wait<O,E>(self:IO<O,E>,?auto:Automation):WaiterDef<O,E>{
     auto = __.option(auto).def(Automation.unit);

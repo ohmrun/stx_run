@@ -8,7 +8,7 @@ class Profile{
   public var limit(default,null):Limit;
   public var repeats(default,null):Int;//how many times has this task been repeated?
   public var changed(default,null):Int;//at which repeat did this last change?
-  public var modified(default,null):Float;//when did the progression last change?
+  public var modified(default,null):Seconds;//when did the progression last change?
 
   @:noUsing static public function conf(?limit:Limit):Profile{
     return new Profile(null,limit);
@@ -53,8 +53,8 @@ class Profile{
     this.progress   = progress;
   }
   public function test(){
-    var since_creation = this.timer.since();
-    var since_change   = Timer.pure(this.modified).since();
+    var since_creation = this.timer.since().toMilliSeconds();
+    var since_change   = Timer.pure(this.modified).since().toMilliSeconds();
     var since_changed  = this.repeats - this.changed;
 
     return 

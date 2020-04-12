@@ -9,4 +9,6 @@ enum AutomationFailure<E>{
   E_Timeout(?float:Float);
 
   E_Escape(pos:Pos);
+
+  E_LaterCalledTooLate;
 }

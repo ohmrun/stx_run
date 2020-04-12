@@ -7,12 +7,6 @@ class Delay extends Base{
     this.milliseconds = milliseconds;
   }
   override public function upply(thk){
-    Run.unit().upply(
-      Schedule.Task(
-        Task.Timeout(milliseconds).seq(
-          Task.Anon(thk)
-        )
-      )
-    );
+    haxe.Timer.delay(thk,milliseconds);
   }
 } 

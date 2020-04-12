@@ -12,7 +12,7 @@ package stx.run.pack;
   }
   static public function pass<E>(handler:(Report<E>->Void)->Automation){
     return feed(
-      (auto,cb) -> auto.snoc(handler(cb))
+      (auto,cb) -> auto.snoc(Task.Anon(handler.bind(cb)))
     );
   }
   static public function into<E>(handler:(Report<E>->Void)->Void){
@@ -42,10 +42,10 @@ package stx.run.pack;
   
   static public function bind_fold<T,E>(fn:T->Report<E>->EIO<E>,arr:Array<T>):EIO<E>{
     return arr.lfold(
-      (next:T,memo:EIO<E>) -> UIO._.flat_map(
+      (next:T,memo:EIO<E>) -> EIO.lift(UIO._.flat_map(
         memo,
         (report) -> fn(next,report)
-      ),
+      )),
       unit()
     );
   }
@@ -58,7 +58,7 @@ class EIOLift{
     return toUIO(self).map((report) -> report.prj().fold(pure,zero.prj()));
   }
   static public function mod<E,EE>(self:EIO<E>,fn:Report<E>->Report<EE>):EIO<EE>{
-    return UIO._.map(self,fn);
+    return EIO.lift(UIO._.map(self,fn));
   }
   static public function toIO<E>(self:EIO<E>):IODef<Noise,E>{
     var a = self.fold(

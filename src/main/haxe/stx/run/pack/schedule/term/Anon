@@ -1,12 +1,12 @@
 package stx.run.pack.schedule.term;
 
 class Anon extends Base{
-  var delegate : Void->Tick;
+  var delegate : Void->Next;
   public function new(delegate){
     super();
     this.delegate = delegate;
   }
-  override public function reply(){
+  override public function status(){
     //trace('anon');
     return delegate();
   }

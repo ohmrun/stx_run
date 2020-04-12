@@ -1,6 +1,6 @@
 import utest.UTest;
 
-using utest.Assert;
+import utest.Assert in Rig;
 
 import utest.Async;
 

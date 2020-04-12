@@ -13,7 +13,7 @@ class TaskAdvancedTest extends utest.Test{
   public function test_main_loop(async:utest.Async){
     Act.Delay(300).upply(
       () -> {
-        Assert.pass();
+        Rig.pass();
         async.done();
       }
     );
