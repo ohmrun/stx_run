@@ -34,7 +34,7 @@ class All extends Base{
     return if(partition.a.is_defined()){
       this.progress = Progression.pure(
         Problem(partition.a.lfold(
-          (next:Task,memo:Option<Err<AutomationFailure<Dynamic>>>) -> next.progress.error().flat_map(
+          (next:Task,memo:Option<Err<RunFailure<Dynamic>>>) -> next.progress.error().flat_map(
             (e) -> memo.map(
               (e2) -> e2.next(e)
             )

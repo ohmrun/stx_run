@@ -49,7 +49,7 @@ interface TaskApi{
   @:noUsing static public inline function fromFuture(ft:Future<Task>):Task{
     return new Deferred(ft);
   }
-  @:noUsing static public function fromError<E>(err:Err<AutomationFailure<E>>):Task{
+  @:noUsing static public function fromError<E>(err:Err<RunFailure<E>>):Task{
     return new Error(err);
   }
   static public function unit():Task{

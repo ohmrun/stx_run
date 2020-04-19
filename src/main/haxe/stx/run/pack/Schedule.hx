@@ -1,28 +1,33 @@
 package stx.run.pack;
 
-import stx.run.pack.Task in TaskTask;
+typedef ScheduleDef = Couple<Stat,Task>;
 
-//import stx.run.pack.schedule.term.Anon;
-import stx.run.pack.schedule.term.Task;
-
-interface ScheduleApi{  
-  public var rtid(get,null):Void->Void;
-  private function get_rtid():Void->Void;
-  
-  public function status():Next;
-  
-  public function pursue():Void;
-  public function escape():Void;
-  
-  public function asScheduleApi():ScheduleApi;
-
-  public function value():Float;//larger value means schedule has seen more usage.
-}
-@:forward abstract Schedule(ScheduleApi) from ScheduleApi{
-  static public function Task(task:TaskTask):Schedule{
-    return new Task(task);
+@:forward abstract Schedule(ScheduleDef) from ScheduleDef to ScheduleDef{
+  static public function lift(self:ScheduleDef):Schedule{
+    return new Schedule(self);
   }
-  /*@:noUsing static public function Anon(fn):Schedule{
-    return new Anon(fn).asScheduleApi();
-  }*/
+  static public function pure(task:Task):Schedule{
+    return lift(__.couple(new Stat(new Clock()),task));
+  }
+  public function new(self) this = self;
+  public function value(){
+    return this.fst().value();
+  }
+  public function progress(){
+    return this.snd().progress.data;
+  }
+  public function is_less_than(that:Schedule):Bool{
+    return switch([progress(),that.progress()]){
+      case [Pending,Pending] : value() < that.value();
+      default                : progress().is_less_than(that.progress());
+    }
+  }
+  public function pursue(){
+    this.fst().enter();
+    this.snd().pursue();
+    this.fst().leave();
+  }
+  public function escape(){
+    this.snd().escape();
+  }
 }

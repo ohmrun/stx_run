@@ -2,7 +2,7 @@ package stx.run.pack;
 
 
 enum ProgressSum{
-  Problem(e:Err<AutomationFailure<Dynamic>>);
+  Problem(e:Err<RunFailure<Dynamic>>);
   Pending;
   
   Polling(milliseconds:MilliSeconds);  
@@ -14,7 +14,7 @@ enum ProgressSum{
 }
 abstract Progress(ProgressSum) from ProgressSum to ProgressSum{
   public function new(self) this = self;
-  public function error():Report<AutomationFailure<Dynamic>>{
+  public function error():Report<RunFailure<Dynamic>>{
     return switch(this){
       case Problem(e) : Some(e);
       default         : None;

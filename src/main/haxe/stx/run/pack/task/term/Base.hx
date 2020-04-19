@@ -29,8 +29,8 @@ class Base implements TaskApi extends Clazz{
           catch(e:Err<Dynamic>){
             var data = e.map(E_UnknownAutomation);
             switch(e.uuid){
-              case AutomationError.UUID : 
-                progression(Problem(Std.downcast(e,AutomationError)));
+              case RunError.UUID : 
+                progression(Problem(Std.downcast(e,RunError)));
               default : 
                 progression(Problem(data));
             }
@@ -39,7 +39,7 @@ class Base implements TaskApi extends Clazz{
             if (Std.string(e) == 'Stack overflow'){
               data = E_StackOverflow;
             }
-            progression(Problem(AutomationError.make(data,None,__.here())));
+            progression(Problem(RunError.make(data,None,__.here())));
           }
     }
   }

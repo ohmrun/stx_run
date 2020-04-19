@@ -1,6 +1,5 @@
 package stx.run;
 
-import stx.run.pack.Processor.ScheduleItem
 import stx.run.pack.task.term.Error;
 import stx.run.pack.task.term.*;
 
@@ -28,16 +27,16 @@ class Test{
 
 				//new SeqTest(),
 				//new DeferredTest()
-				new ProcessorTest()
+				new SchedulerTest()
 			].last().toArray()
 		);
   }
 }
-class ProcessorTest extends utest.Test{
+class SchedulerTest extends utest.Test{
 	@Ignored
 	public function test(){
 		var done	 		= false;
-		var processor = Processor.ZERO;
+		var processor = Scheduler.ZERO;
 				processor.add(
 					Task.Anon(
 						() -> {
@@ -51,13 +50,13 @@ class ProcessorTest extends utest.Test{
 	@Ignored
 	public function test_wake(){
 		var hold = Future.trigger();
-		var proc = Processor.unit();
+		var proc = Scheduler.unit();
 				proc.add(Task.On(hold));
 				proc.run(new MySleepyThread());
 				hold.trigger(Noise);
 	}
 	private function thread(){
-		return new stx.run.pack.Processor.ThreadApiBase();
+		return new stx.run.pack.Runtime.RuntimeApiBase();
 	}
 	@Ignored
 	@:timeout(2000)
@@ -69,7 +68,7 @@ class ProcessorTest extends utest.Test{
 						count++;
 						return switch([report,count]){
 							default : Exit;
-						}
+					}
 					}
 				);	
 				Act.Delay(500).upply(
@@ -107,9 +106,22 @@ class ProcessorTest extends utest.Test{
 				);
 	}
 	public function test_lesser_of_two_Polls(){
-		var t0 = new SetTaskStatusTask(Polling(10));
-		var t1 = new SetTaskStatusTask(Polling(100));
+		var p0 	: Ref<Progress> = Polling(10);
+		var t0 								  = new SetTaskStatusTask(p0);
+		var p1 	: Ref<Progress> = Polling(100);
+		var t1 									= new SetTaskStatusTask(p1);
+		var ls = Schedule.pure(t0);
+		var rs = Schedule.pure(t1);
 		
+		var tv = () -> trace('${ls.value()} ${rs.value()}');
+		var ts = () -> trace('${ls.progress()} ${rs.progress()}');
+
+		Rig.isTrue(ls.is_less_than(rs));
+		Rig.isTrue(ls.progress().is_less_than(rs.progress()));
+		ls.pursue();
+		Rig.isTrue(ls.is_less_than(rs));
+		Rig.isTrue(ls.progress().is_less_than(rs.progress()));
+		Rig.isFalse(ls.value() < rs.value());
 	}
 }
 class MyThreadyThread{
@@ -146,7 +158,7 @@ class SetTaskStatusTask implements stx.run.pack.Task.TaskApi{
 	}
 	var prog : Ref<Progress>;
 
-	public function new(prog){
+	public function new(prog:Ref<Progress>){
 		this.rtid = ()->{};
 		this.prog = prog;
 	}

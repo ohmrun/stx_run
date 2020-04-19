@@ -1,46 +1,39 @@
 package stx.run.pack;
 
-import haxe.MainLoop.MainLoop;
-import haxe.MainLoop.MainEvent;
-
-interface RuntimeApi{
-  public function run(scheduler:Scheduler):Void;
+@:forward abstract Runtime(RuntimeDef) from RuntimeDef{
+  static public var ZERO(default,null) : Runtime = new RuntimeApiBase();
 }
-class RuntimeBase implements RuntimeApi{
-  public function new(){
-    run(Scheduler.ZERO);
-  }
-  public function run(scheduler:Scheduler):Void{
-    var event : MainEvent = null;
-        event = MainLoop.add(
-          () -> {
-            var status = scheduler.status();
-            __.log().close().trace('run: $status');
-            switch(status){
-              case Busy: 
-                scheduler.pursue();
-              case Poll(milliseconds) : 
-                scheduler.pursue();
-                event.delay(milliseconds == null ? null : (@:privateAccess milliseconds.toSeconds().prj()));
-              case Fail(e):
-                event.stop();
-                scheduler.escape();
-                MainLoop.runInMainThread(
-                  () -> {
-                    throw(e);
+typedef RuntimeDef = {
+  public function enter(fn:Report<Dynamic>->Tick):Void;
+}
+class RuntimeApiBase{
+  public function new(){}
+  public function enter(fn:Report<Dynamic>->Tick){
+    //trace('enter');
+    var inner: Bool -> Void = null;
+        inner = (waiting:Bool) -> {
+          var event : MainEvent = null;
+              event = MainLoop.add(
+                () -> {
+                  //trace('running');
+                  if(!waiting){
+                    var status = fn(Report.unit());
+                    switch(status){
+                      case Tick.Busy(wake): 
+                        waiting = true;
+                        wake(inner.bind(false));
+                        //BackOff?
+                      case Tick.Poll(milliseconds) : 
+                        event.delay(milliseconds == null ? null : (@:privateAccess milliseconds.toSeconds().prj()));
+                      case Tick.Fail(e):
+                        fn(Report.pure(e));
+                      case Tick.Exit:
+                        event.stop();
+                    }
                   }
-                );
-              case Exit:
-                event.stop();
-            }
-          }
-        );
-  }
-}
-@:forward abstract Runtime(RuntimeApi) from RuntimeApi{
-  public function new(self) this = self;
-  static public var ZERO(default,never) = new RuntimeBase();
-  static public function run(scheduler:Scheduler):Void{
-    ZERO.run(scheduler);
+                }
+          );
+    }
+    inner(false);
   }
 }

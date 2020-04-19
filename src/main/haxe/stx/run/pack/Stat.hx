@@ -4,9 +4,9 @@ class Stat{
   private var clock(default,null):Clock;
   public function new(clock:Clock){
     this.clock            = clock;
-    this.accessed         = 0;
-    this.total_runtime    = 0;
-    this.total_waiting    = 0;
+    this.accessed         = 1;
+    this.total_runtime    = 1;
+    this.total_waiting    = 1;
   }
   var last_access(default,null)    : Null<Seconds>;
   var last_runtime(default,null)   : Null<Seconds>;

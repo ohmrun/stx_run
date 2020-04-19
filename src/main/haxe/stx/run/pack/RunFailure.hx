@@ -1,6 +1,6 @@
 package stx.run.pack;
 
-enum AutomationFailure<E>{
+enum RunFailure<E>{
   E_NoValueFound();
   E_UnknownAutomation(e:Dynamic);
   E_StackOverflow;
