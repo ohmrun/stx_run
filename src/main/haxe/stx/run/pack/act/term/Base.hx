@@ -9,15 +9,15 @@ class Base implements ActApi{
   public function upply(thk:Void->Void){
     throw "UNIMPLEMENTED ABSTRACT FUNCTION";
   }
-  final public function reply():Bang{
+  final public function reply():Future<Noise>{
     //trace("BASE::APPLY");
-    var ft    = __.future();
+    var ft    = Future.trigger();
     this.upply(
       () -> {
-        ft.fst().trigger(Noise);
+        ft.trigger(Noise);
       }
     );
-    return Bang.fromFuture(ft.snd());
+    return ft;
   }
   public function report(e:Err<Dynamic>):Void{
     Act.MainThread().upply(

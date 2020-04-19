@@ -3,45 +3,6 @@ package stx;
 class Pack{
   
 }
-class AnonAsyncApi<P,O,E> extends AsyncApi<P,O,E>{
-  var _applyII : P->Terminal<O,E>->Response<E>;
-  public function new(_applyII){
-    super();
-    this._applyII = _applyII;
-  }
-  override private function doApplyII(p:P,t:Terminal<O,E>):Response<E>{
-    return _applyII(p,t);
-  }
-}
-class AsyncApi<P,O,E>{
-	//public var open(default,null):Bool = false;
-	public function new(){
-
-	}
-	public function applyII(p:P,t:Terminal<O,E>):Response<E>{
-		var output = doApplyII(p,t);
-		// if(!t.ready){
-		// 	throw 'use the terminal before returning from function';
-		// }
-		return output;
-	}
-	private function doApplyII(p:P,t:Terminal<O,E>):Response<E>{
-		var err : Err<AutomationFailure<E>> = __.fault().err(E_AbstractMethod);
-		return t.error(err);
-  }
-  public function asAsyncDef():AsyncDef<P,O,E>{
-    return this;
-  }
-}
-typedef AsyncDef<P,O,E>       = {
-  public function applyII(p:P,t:Terminal<O,E>):Response<E>;
-  public function asAsyncDef():AsyncDef<P,O,E>;
-}
-abstract Async<P,O,E>(AsyncDef<P,O,E>) from AsyncDef<P,O,E> to AsyncDef<P,O,E>{
-  static public function Anon<P,O,E>(fn:P->Terminal<O,E>->Response<E>){
-    return new AnonAsyncApi(fn);
-  }
-}
 typedef Recall<I,O,R>         = stx.run.pack.Recall<I,O,R>;
 typedef RecallDef<I,O,R>  = {
   public function applyII(i:I,cb:Sink<O>):R;
@@ -67,11 +28,20 @@ typedef LimitDef = {
 }
 typedef Limit                 = LimitDef;
 
-typedef BangDef               = RecallDef<Noise,Noise,Void>;
-typedef Bang                  = stx.run.pack.Bang;
+//typedef BangDef               = RecallDef<Noise,Noise,Void>;
+abstract Bang(Future<Noise>) from Future<Noise> to Future<Noise>{
+  static public function pure(fn:Void->Void){
+    return Future.async(
+      (cb) -> {
+        fn();
+        cb(Noise);
+      }
+    );
+  }
+}
 
-typedef ReactorDef<T>         = RecallDef<Noise,T,Void>;
-typedef Reactor<T>            = stx.run.pack.Reactor<T>;
+//typedef ReactorDef<T>         = RecallDef<Noise,T,Void>;
+//typedef Reactor<T>            = stx.run.pack.Reactor<T>;
 
 //typedef ReceiverDef<T>        = RecallDef<Noise,T,Automation>;
 //typedef Receiver<O>           = stx.run.pack.Receiver<O>;
@@ -88,8 +58,8 @@ typedef Reactor<T>            = stx.run.pack.Reactor<T>;
 //typedef EIODef<E>             = RecallDef<Automation,Report<E>,Automation>;
 //typedef EIO<E>                = stx.run.pack.EIO<E>;
 
-typedef AutomationDef         = stx.run.pack.Automation.AutomationDef;
-typedef Automation            = stx.run.pack.Automation;
+//typedef AutomationDef         = stx.run.pack.Automation.AutomationDef;
+//typedef Automation            = stx.run.pack.Automation;
 
 typedef AutomationError       = stx.run.pack.AutomationError;
 typedef AutomationFailure<E>  = stx.run.pack.AutomationFailure<E>;
@@ -139,7 +109,6 @@ typedef Module                = stx.run.pack.Module;
 typedef Next                  = stx.run.pack.Next;
 typedef NextSum               = stx.run.pack.Next.NextSum;
 
-
 typedef ScheduleApi           = stx.run.pack.Schedule.ScheduleApi;
 typedef Schedule              = stx.run.pack.Schedule;
 
@@ -150,7 +119,7 @@ typedef Scheduler             = stx.run.pack.Scheduler;
 
 interface ActApi{
   public function upply(thunk:Void->Void):Void; 
-  public function reply():Bang;
+  public function reply():Future<Noise>;
 
   public function report(err:Err<Dynamic>):Void;
 
@@ -159,9 +128,8 @@ interface ActApi{
 typedef Act                   = stx.run.pack.Act;
 typedef Timer                 = stx.run.pack.Timer;
 
-typedef Terminal<O,E>         = stx.run.pack.Terminal<O,E>;
-typedef Response<E>           = stx.run.pack.Response<E>;
-
 typedef Seconds               = stx.run.pack.Seconds;
 typedef MilliSeconds          = stx.run.pack.MilliSeconds;
 typedef Runtime               = stx.run.pack.Runtime;
+typedef Processor             = stx.run.pack.Processor;
+typedef Tick                  = stx.run.pack.processor.Tick;

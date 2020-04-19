@@ -38,8 +38,8 @@ abstract Automation(AutomationDef) from AutomationDef to AutomationDef{
   @:noUsing static public function failure(err:Err<AutomationFailure<Dynamic>>):Automation{
     return into((cb) -> cb(Right(Report.pure(err))));
   }
-  @:noUsing static public function interim(thk:ReactorDef<Automation>):Automation{
-    return into((cb) -> thk.applyII(Noise,(auto) -> cb(Left(auto))));
+  @:noUsing static public function interim(thk:Future<Automation>):Automation{
+    return into((cb) -> thk.handle((auto) -> cb(Left(auto))));
   }
   @:noUsing inline static public function execute<E>(thk:Void->Option<Err<E>>):Automation{
     var fn : Noise -> Automation = ((_:Noise) -> switch(thk()){

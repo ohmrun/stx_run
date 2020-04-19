@@ -2,7 +2,6 @@ package stx.run.pack;
 
 import stx.run.pack.act.term.Anon;
 import stx.run.pack.act.term.Delay;
-import stx.run.pack.act.term.Eager;
 import stx.run.pack.act.term.Defer;
 import stx.run.pack.act.term.MainThread;
 
@@ -14,6 +13,5 @@ import haxe.MainLoop;
   @:noUsing static public function Delay(milliseconds):Act               return new Delay(milliseconds).asActApi();
   @:noUsing static public function Anon(fn):Act                          return new Anon(fn).asActApi();
   @:noUsing static public function Defer():Act                           return new Defer().asActApi();
-  @:noUsing static public function Eager():Act                           return new Eager().asActApi();
   @:noUsing static public function MainThread():Act                      return new MainThread().asActApi();
 }

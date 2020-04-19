@@ -4,16 +4,24 @@ class When<T> extends Base{
   var trigger   : FutureTrigger<T>;
   var received  : Bool = false;
 
-  function new(){
+  public function new(?trigger){
     super();
-    this.trigger = Future.trigger();
-    this.trigger.asFuture().handle(
-      (o) -> {
-        this.received = true;
-      }
+    this.trigger  = trigger == null ? Future.trigger() : trigger;
+    this.progression(
+      Waiting(this.trigger.asFuture().map(
+        (_) -> {
+          this.received = true;
+          return Noise;
+        }
+      ))
     );
   }
-  override public function do_pursue():Bool{
-    return !received;
+  override private function do_pursue():Bool{
+    return if(received){
+      progression(Secured);
+      false;
+    }else{
+      true;
+    }
   }
 }

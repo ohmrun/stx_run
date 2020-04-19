@@ -11,7 +11,7 @@ class Race extends Base{
     this.rhs = rhs;
   }
 
-  override public function do_pursue(){
+  override private function do_pursue(){
     return switch([lhs.progress.data,rhs.progress.data]){
       case [Escaped,Escaped]    : 
         progression(Escaped);
@@ -76,7 +76,7 @@ class Race extends Base{
         progression(Polling(p));
     }
   }
-  override public function do_escape(){
+  override private function do_escape(){
     lhs.escape();
     rhs.escape();
   }

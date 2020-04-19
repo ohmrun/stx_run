@@ -6,6 +6,7 @@ import stx.run.pack.task.term.Seq;
 import stx.run.pack.task.term.Anon;
 import stx.run.pack.task.term.Deferred;
 import stx.run.pack.task.term.Base;
+import stx.run.pack.task.term.Both;
 import stx.run.pack.task.term.Error;
 import stx.run.pack.task.term.Unit;
 import stx.run.pack.task.term.Timeout;
@@ -14,13 +15,13 @@ import stx.run.pack.task.term.On;
 import stx.run.pack.task.term.Blocking;
 
 interface TaskApi{
+  //public var declared(default,null): Pos;
+  
   public var rtid(default,null): Void->Void;
   public var progress(get,set): Progression;
-  function get_progress():Progression;
-  function set_progress(ts:Progression):Progression;
 
-  public var ongoing(get,null): Bool;
-  function get_ongoing():Bool;
+  private function get_progress():Progression;
+  private function set_progress(ts:Progression):Progression;
 
   public function pursue():Void;
   public function escape():Void;
@@ -54,17 +55,26 @@ interface TaskApi{
   static public function unit():Task{
     return new Unit();
   }
-  @:noUsing static public function On(bang:Bang):Task{
+  @:noUsing static public function On(bang:FutureTrigger<Noise>):Task{
     return new On(bang);
   }
   @:noUsing static public function Timeout(milliseconds):Task{
     return new Timeout(milliseconds);
   }
-  @:noUsing static public function All(iterator:Iterator<Task>):Task{
-    return new All(iterator);
+  @:noUsing static public function All(array:Array<Task>):Task{
+    return new All(array);
   }
   @:noUsing static public function Blocking(ref:Ref<Bool>):Task{
     return new Blocking(ref);
+  }
+  @:noUsing static public function Both(lhs:Task,rhs:Task):Task{
+    return new Both(lhs,rhs);
+  }
+  @:noUsing static public function Err(e):Task{
+    return new stx.run.pack.task.term.Err(e);
+  }
+  @:noUsing static public function Error(e):Task{
+    return new stx.run.pack.task.term.Error(e);
   }
   private var self(get,never):Task;
   private function get_self():Task return this;

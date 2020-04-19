@@ -13,6 +13,8 @@ class TaskTest extends utest.Test{
     Rig.same(task.progress.data,Secured);
     Rig.isTrue(has_been_called.value);
 
+  }
+  public function test_anon(){
     var a = false;
     var task = Task.Anon(
       () -> a = true
@@ -34,17 +36,18 @@ class TaskTest extends utest.Test{
         task.pursue();
     Rig.same(Secured,task.progress.data);
   }
+  @:timeout(2000)
   public function test_deferred_async(async:Async){
-    var task = new DeferredSimpleTask(async).asTaskApi();
+    var task          = new DeferredSimpleTask(async).asTaskApi();
     var async_reactor = Future.async(
       (cb) -> {
-        __.log().close().trace('cb called: ${task.progress.data}');
-        Act.Delay(20).reply().map(
+        //__.log().trace('cb called: ${task.progress.data}');
+        Act.Delay(300).reply().map(
           (_) -> {
-            __.log().close().trace('after_wait: ${task.progress.data}');
+          //  __.log().trace('after_wait: ${task.progress.data}');
             return task;
           }
-        ).upply(cb);
+        ).handle(cb);
       }
     );
     var task = new Deferred(async_reactor);
@@ -56,9 +59,10 @@ class TaskTest extends utest.Test{
       );
       default:
     }
-    Rig.isTrue(task.ongoing);
+    Rig.isTrue(task.progress.data.ongoing);
         task.pursue();
-    Rig.same(Polling(240),task.progress.data);//TODO is this a bug?
+    
+    Rig.same(Polling(200),task.progress.data);
 
   }
 }
@@ -81,6 +85,7 @@ private class SimpleTask extends Base{
   }
   override function do_pursue(){
     this.has_been_called.value = true;
+    progression(Secured);
     return false;
   }
 }

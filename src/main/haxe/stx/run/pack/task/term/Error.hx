@@ -1,13 +1,13 @@
 package stx.run.pack.task.term;
 
 class Error<E> extends Base{
-  var error : Err<AutomationFailure<E>>;
-  public function new(error:Err<AutomationFailure<E>>){
+  var error : E;
+  public function new(error:E){
     super();
     this.error = error;
   }
-  override public function do_pursue(){
-    this.progress = Progression.pure(Problem(error));
+  override private function do_pursue(){
+    this.progress = Progression.pure(Problem(__.fault().of(E_UnknownAutomation(error))));
     return false;
   }
 }

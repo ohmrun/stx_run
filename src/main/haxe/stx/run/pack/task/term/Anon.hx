@@ -15,6 +15,7 @@ class Anon extends Base{
 
   override function do_pursue() {
     this._pursue();
+    progression(Secured);
     return super.do_pursue();
   }
   override function do_escape() {

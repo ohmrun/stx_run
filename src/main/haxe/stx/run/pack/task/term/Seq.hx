@@ -12,12 +12,12 @@ class Seq extends Base{
     this.arr = [];
     super();
   }
-  override public function do_pursue(){
+  override private function do_pursue(){
     __.log().close().trace('Seq#do_pursue');
     var last = arr.last();
     return last.fold(
       (task:Task) -> 
-        task.ongoing.if_else(
+        task.progress.data.ongoing.if_else(
           () -> {
             task.pursue();
             progression(task.progress.data);
@@ -64,7 +64,7 @@ class Seq extends Base{
       None;
     }
   }
-  override public function do_escape(){
+  override private function do_escape(){
     
   }
   override public function do_cleanup(){

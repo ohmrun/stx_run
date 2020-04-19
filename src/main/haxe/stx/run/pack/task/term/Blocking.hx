@@ -6,7 +6,7 @@ class Blocking extends Base{
     super();
     this.blocking = blocking;
   }
-  override public function do_pursue(){
+  override private function do_pursue(){
     return if(blocking.value == false){
       this.progress = Progression.pure(Secured);
       false;

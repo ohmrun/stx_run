@@ -7,7 +7,8 @@
 
 
 
--lib stx_core
+-lib stx_pico
+-lib stx_nano
 -lib stx_fn
 -lib stx_log
 -lib stx_fp

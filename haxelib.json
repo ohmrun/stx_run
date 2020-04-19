@@ -15,7 +15,8 @@
     "dependencies": {
         "tink_core": "",
         "tink_concurrent" : "",
-        "stx_core": "",
+        "stx_pico": "",
+        "stx_nano": "",
         "stx_fn": "",
         "stx_log": "",
         "stx_parse": "",

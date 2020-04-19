@@ -3,33 +3,27 @@ package stx.run.pack.task.term;
 import stx.core.alias.StdArray;
 
 class All extends Base{
-  var gen   : Iterator<Task>;
   var arr   : StdArray<Task>;
   var init  : Bool;
 
-  public function new(gen:Iterator<Task>){
-    this.gen  = gen;
-    this.arr  = [];
+  public function new(arr:Array<Task>){
+    this.arr  = arr;
     this.init = false;
     super();
   }
-  override public function do_escape(){
+  override private function do_escape(){
     for(task in arr){
       task.escape();
     }
   }
   override public function do_cleanup(){
-    this.gen = [].iterator();
     this.arr = [];
   }
   
-  override public function do_pursue(){
+  override private function do_pursue(){
     var recurring = true;
     if(!init){
       init = true;
-      for(task in gen){
-        arr.push(task);
-      }
     }
     var partition = arr.partition(
       (task) -> switch(task.progress.data){
@@ -37,7 +31,6 @@ class All extends Base{
         default         : false;
       }
     );
-    __.log().close().trace(partition);
     return if(partition.a.is_defined()){
       this.progress = Progression.pure(
         Problem(partition.a.lfold(
@@ -53,6 +46,9 @@ class All extends Base{
         task.escape();
       }
       false;
+    }else if(!partition.b.is_defined()){
+      progression(Secured);
+      false;
     }else{
       for(task in arr){
         task.pursue();
@@ -60,7 +56,7 @@ class All extends Base{
           return true;
         }
       }
-      this.progress = Progression.pure(partition.b.lfold1(
+      progression(partition.b.lfold1(
         (next:Task,memo:Task) -> memo.progress.is_less_than(next.progress) ? memo : next
       ).map( t -> t.progress.data ).defv(Problem(__.fault().of(E_NoValueFound))));
 
