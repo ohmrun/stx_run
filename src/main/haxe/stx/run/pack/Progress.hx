@@ -52,4 +52,7 @@ abstract Progress(ProgressSum) from ProgressSum to ProgressSum{
       default : false;
     }
   }
+  public function toString():String{
+    return Std.string(this);
+  }
 } 

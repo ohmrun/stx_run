@@ -41,11 +41,12 @@ class Deferred extends Base{
   override function do_pursue(){
     __.log().close().trace("Deferred#do_pursue");
     if(!init){
-      this.progress = Progression.pure(Pending);
+      progression(Pending);
       init = true;
       __.log().close().trace('Deferred#do_pursue({init : true})');
 
-      var reaction   = (value) -> {
+      var reaction   = (value:Task) -> {
+        __.log().close().trace('Deferred#do_pursue reaction: $value');
         this.impl = value;
         do_delegate();
       }
@@ -56,7 +57,7 @@ class Deferred extends Base{
         do_delegate();
       }else{
         __.log().close().trace('asynchronous');
-        this.progress = Progression.pure(Waiting(deferred.map(_ -> Noise)));
+        progression(Waiting(deferred.map(_ -> Noise)));
       }
     }else{
       __.log().close().trace('Deferred#do_pursue({init : false}) ${this.progress.data}');
@@ -65,7 +66,7 @@ class Deferred extends Base{
           do_delegate();
         }else{
           //still waiting, if I'm being called it must be polling time.
-          this.progress = Progression.pure(Polling(poll.delta));
+          progression(Polling(poll.delta));
         }
       }else if(__.that().alike().ok(Polling(null),this.progress.data)){
         if(arrived){
@@ -74,7 +75,7 @@ class Deferred extends Base{
           if(this.poll.ready()){
             __.log().close().trace("ready");
             poll.roll();
-            this.progress = Progression.pure(Polling(poll.delta));
+            progression(Polling(poll.delta));
           }else{
             __.log().close().trace("not ready");
             //not ready, not passed the polling time: ignore.

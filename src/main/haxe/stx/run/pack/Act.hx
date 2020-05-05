@@ -7,6 +7,15 @@ import stx.run.pack.act.term.MainThread;
 
 import haxe.MainLoop;
 
+interface ActApi{
+  public function upply(thunk:Void->Void):Void; 
+  public function reply():Future<Noise>;
+
+  public function report(err:Err<Dynamic>):Void;
+
+  public function asActApi():ActApi;
+}
+
 @:forward abstract Act(ActApi) from ActApi{
   private function new(fn) this = fn;
 

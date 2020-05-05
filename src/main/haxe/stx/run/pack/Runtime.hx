@@ -9,19 +9,23 @@ typedef RuntimeDef = {
 class RuntimeApiBase{
   public function new(){}
   public function enter(fn:Report<Dynamic>->Tick){
-    //trace('enter');
+    var waits = 0;
     var inner: Bool -> Void = null;
         inner = (waiting:Bool) -> {
           var event : MainEvent = null;
               event = MainLoop.add(
                 () -> {
-                  //trace('running');
                   if(!waiting){
                     var status = fn(Report.unit());
+                    //trace('waiting: $waiting status = $status');
                     switch(status){
                       case Tick.Busy(wake): 
                         waiting = true;
-                        wake(inner.bind(false));
+                        wake(
+                          () -> {
+                            waiting = false;
+                          }
+                        );
                         //BackOff?
                       case Tick.Poll(milliseconds) : 
                         event.delay(milliseconds == null ? null : (@:privateAccess milliseconds.toSeconds().prj()));

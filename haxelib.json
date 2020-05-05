@@ -14,7 +14,7 @@
     "url": "https://github.com/0b1kn00b/stx_run",
     "dependencies": {
         "tink_core": "",
-        "tink_concurrent" : "",
+        "stx_coroutine": "",
         "stx_pico": "",
         "stx_nano": "",
         "stx_fn": "",

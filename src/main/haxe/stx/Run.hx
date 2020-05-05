@@ -54,17 +54,15 @@ typedef Schedule              = stx.run.pack.Schedule;
 typedef SchedulerApi          = stx.run.pack.Scheduler.SchedulerApi;
 typedef Scheduler             = stx.run.pack.Scheduler;
 
-interface ActApi{
-  public function upply(thunk:Void->Void):Void; 
-  public function reply():Future<Noise>;
-
-  public function report(err:Err<Dynamic>):Void;
-
-  public function asActApi():ActApi;
-}
+typedef ActApi                = stx.run.pack.Act.ActApi;
 typedef Act                   = stx.run.pack.Act;
 typedef Timer                 = stx.run.pack.Timer;
 typedef Seconds               = stx.run.pack.Seconds;
 typedef MilliSeconds          = stx.run.pack.MilliSeconds;
 typedef Runtime               = stx.run.pack.Runtime;
 typedef Tick                  = stx.run.pack.processor.Tick;
+typedef Stat                  = stx.run.pack.Stat;
+typedef Clock                 = stx.run.pack.Clock;
+typedef JobDef<R,E>           = stx.run.pack.Job.JobDef<R,E>;
+typedef Job<R,E>              = stx.run.pack.Job<R,E>;
+typedef Agenda<E>             = stx.run.pack.Agenda<E>;

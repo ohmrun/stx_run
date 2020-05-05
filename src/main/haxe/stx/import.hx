@@ -5,12 +5,11 @@ import haxe.MainLoop.MainEvent;
 import haxe.ds.ArraySort;
 
 
+#if (test=="stx_run")
 import utest.Assert in Rig;
-
+#end
 import tink.CoreApi;
 
-
-import stx.core.pack.Array;
 
 using stx.Fn;
 using stx.Assert;
@@ -20,4 +19,6 @@ using stx.Fp;
 using stx.Nano;
 using stx.Pico;
 
+
+using stx.coroutine.Pack;
 using stx.Run;

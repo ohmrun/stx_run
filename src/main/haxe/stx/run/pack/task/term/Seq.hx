@@ -1,8 +1,6 @@
 package stx.run.pack.task.term;
 
 using Lambda;
-import stx.core.alias.StdArray;
-
 class Seq extends Base{
   var gen : Iterator<Task>;
   var arr : StdArray<Task>;

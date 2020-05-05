@@ -33,7 +33,7 @@ class BaseScheduler implements SchedulerApi{
     this.tasks = [];
   }
   public function add(task:Task){
-    put(__.couple(new Stat(clock),task));
+    put(__.couple(Stat.pure(clock),task));
   }
   private function put(item:Schedule){
     this.tasks.push(item);
@@ -76,7 +76,7 @@ class BaseScheduler implements SchedulerApi{
     }
   }
   private function pursue():Tick{
-    trace(peek().progress());
+    //trace(peek().snd());
     return switch(peek().progress()){
       case Pending     : 
         var schedule = pop();
@@ -90,9 +90,19 @@ class BaseScheduler implements SchedulerApi{
       case Polling(p)  : 
         Tick.Poll(p);
       case Waiting(ft) :
-        Tick.Busy((cb) -> ft.handle((_) -> cb()));
-      case Working | Secured | Escaped :
+        
+        Tick.Busy(
+          (cb) -> ft.handle(
+            (_) -> {
+              trace(peek().snd());
+              cb();
+            }
+          )
+        );
+      case Working  :
         Tick.Poll(); 
+      case Secured | Escaped :
+        Tick.Exit;
     }
   }
   private function error(e){

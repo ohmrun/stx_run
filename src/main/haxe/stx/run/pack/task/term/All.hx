@@ -1,6 +1,5 @@
 package stx.run.pack.task.term;
 
-import stx.core.alias.StdArray;
 
 class All extends Base{
   var arr   : StdArray<Task>;
@@ -65,5 +64,9 @@ class All extends Base{
         default : false;
       }
     }
+  }
+  override public function toString(){
+    var inner = this.arr.map(_ -> _.toString());
+    return 'All($inner)';
   }
 }

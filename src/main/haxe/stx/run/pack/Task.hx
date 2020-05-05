@@ -27,6 +27,7 @@ interface TaskApi{
   public function escape():Void;
 
   public function asTaskApi():TaskApi;
+  public function toString():String;
 }
 
 @:forward abstract Task(TaskApi) from TaskApi to TaskApi{

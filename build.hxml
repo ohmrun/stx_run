@@ -10,10 +10,13 @@
 -lib stx_pico
 -lib stx_nano
 -lib stx_fn
+-lib stx_coroutine
+
+-lib stx_assert
+
 -lib stx_log
 -lib stx_fp
 
--lib stx_assert
 
 -lib min-max
 -lib stx_parse

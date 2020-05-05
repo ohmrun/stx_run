@@ -31,4 +31,8 @@ package stx.run.pack;
   public function get_ongoing():Bool{
     return this.data.ongoing;
   }
+  public function toString():String{
+    var inner = this.data.toString();
+    return 'Progression($inner)';
+  }
 }

@@ -1,8 +1,6 @@
 package stx.run.pack.task.term;
 
 
-import tink.concurrent.Mutex;
-
 /**
   Shamelessly pilferred from tink.
 **/
@@ -73,7 +71,8 @@ class Base implements TaskApi extends Clazz{
   public function asTaskApi():TaskApi{
     return this;
   }
-  private function progression(progress,?pos:Pos){
+  private function progression(progress:Progress,?pos:Pos){
+    //__.log().trace('progress: $progress');
     this.progress = Progression.pure(progress);
   }
   public function toString(){

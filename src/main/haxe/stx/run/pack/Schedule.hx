@@ -7,7 +7,7 @@ typedef ScheduleDef = Couple<Stat,Task>;
     return new Schedule(self);
   }
   static public function pure(task:Task):Schedule{
-    return lift(__.couple(new Stat(new Clock()),task));
+    return lift(__.couple(Stat.pure(new Clock()),task));
   }
   public function new(self) this = self;
   public function value(){

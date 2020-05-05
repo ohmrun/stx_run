@@ -4,6 +4,7 @@ import stx.run.pack.task.term.Deferred;
 import stx.run.pack.task.term.Base;
 
 class TaskTest extends utest.Test{
+  @Ignored
   public function test(){
     var has_been_called : Ref<Bool> = false;
     var task = new SimpleTask(has_been_called);
@@ -14,6 +15,7 @@ class TaskTest extends utest.Test{
     Rig.isTrue(has_been_called.value);
 
   }
+  @Ignored
   public function test_anon(){
     var a = false;
     var task = Task.Anon(
@@ -25,6 +27,7 @@ class TaskTest extends utest.Test{
     Rig.same(Secured,task.progress.data);
     Rig.isTrue(a);
   }
+  @Ignored
   public function test_deferred_sync(){
     var hbc : Ref<Bool> = false;
 
@@ -36,16 +39,16 @@ class TaskTest extends utest.Test{
         task.pursue();
     Rig.same(Secured,task.progress.data);
   }
+  @Ignored
   @:timeout(2000)
   public function test_deferred_async(async:Async){
-    var task          = new DeferredSimpleTask(async).asTaskApi();
     var async_reactor = Future.async(
       (cb) -> {
         //__.log().trace('cb called: ${task.progress.data}');
         Act.Delay(300).reply().map(
           (_) -> {
           //  __.log().trace('after_wait: ${task.progress.data}');
-            return task;
+            return new DeferredSimpleTask(async).asTaskApi();
           }
         ).handle(cb);
       }
@@ -55,15 +58,45 @@ class TaskTest extends utest.Test{
         task.pursue();
     switch(task.progress.data){
       case Waiting(rct) : rct.handle(
-        (_) -> Rig.pass()
+        (_) -> {}//Rig.pass()
       );
       default:
     }
+    Act.Delay(1000).upply(
+      () -> {
+        task.pursue();
+        Rig.same(Secured,task.progress.data);
+        async.done();
+      }
+    );
     Rig.isTrue(task.progress.data.ongoing);
         task.pursue();
     
     Rig.same(Polling(200),task.progress.data);
 
+  }
+  @:timeout(2000)
+  public function test_deferred_async_scheduler(async:Async){
+    var async_reactor = Future.async(
+      (cb) -> {
+        //__.log().trace('cb called: ${task.progress.data}');
+        Act.Delay(300).reply().map(
+          (_) -> {
+          //  __.log().trace('after_wait: ${task.progress.data}');
+            return new DeferredSimpleTask(async).asTaskApi();
+          }
+        ).handle(cb);
+      }
+    );
+    var task = new Deferred(async_reactor);
+    Act.Delay(1000).upply(
+      () -> {
+        Rig.same(Secured,task.progress.data);
+        async.done();
+      }
+    );
+    Scheduler.ZERO.add(task);
+    Scheduler.ZERO.run();
   }
 }
 private class DeferredSimpleTask extends Base{
@@ -73,7 +106,8 @@ private class DeferredSimpleTask extends Base{
     this.async = async;
   }
   override function do_pursue(){
-    async.done();
+    //async.done();
+    this.progression(Secured);
     return false;
   }
 }
