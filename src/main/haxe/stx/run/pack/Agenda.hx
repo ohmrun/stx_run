@@ -25,6 +25,7 @@ abstract Agenda<E>(AgendaDef<E>) from AgendaDef<E> to AgendaDef<E>{
 					__.done(last == null ? Stat.unit() : last);
 				case Halt(Terminated(CauseSum.Exit(e))) 		: 
 					__.fail(e);
+					
 			});	
 		}
 		return rec(job);
@@ -48,6 +49,13 @@ abstract Agenda<E>(AgendaDef<E>) from AgendaDef<E> to AgendaDef<E>{
 				);
 			}
 		);
+	}
+	public function crunch(scheduler){
+		var eff : Effect<E> = Coroutine._.map_r(
+			Coroutine._.map(this,_ -> Noise),
+			_ -> Noise
+		);
+		eff.crunch();
 	}
 	
 	@:to public function toCoroutine(){
