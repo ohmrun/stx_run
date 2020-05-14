@@ -1,9 +1,13 @@
-# Haxe project
+# stx_run
 
-This is an example Haxe project scaffolded by Visual Studio Code.
+Task library based on coroutines.
 
-Without further changes the structure is following:
+This library is comprised of two `Coroutine`s. `Job` is a coroutine that emits `Stat`, which describes how long that coroutine has been in interpretation, and returns some value on `Halt`. 
 
- * `src/Main.hx`: Entry point Haxe source file
- * `build.hxml`: Haxe command line file used to build the project
- * `README.md`: This file
+When the halt value has some found home, it can be transformed to an `Agenda` which can be composed with other `Agenda`s in such a way as it always schedules the one which has spent less time being interpreted, using `Stat` to do so. 
+
+`Agenda` has to compositions: `seq`, which runs one and then the other, and `par`, which oscilates between the two coroutines. 
+
+## Current State
+
+The only worry currently is related to cleanups in early terminations.
