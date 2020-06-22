@@ -6,7 +6,7 @@ This library is comprised of two `Coroutine`s. `Job` is a coroutine that emits `
 
 When the halt value has some found home, it can be transformed to an `Agenda` which can be composed with other `Agenda`s in such a way as it always schedules the one which has spent less time being interpreted, using `Stat` to do so. 
 
-`Agenda` has to compositions: `seq`, which runs one and then the other, and `par`, which oscilates between the two coroutines. 
+`Agenda` has two compositions: `seq`, which runs one and then the other, and `par`, which oscilates between the two coroutines. 
 
 ## Current State
 

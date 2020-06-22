@@ -6,6 +6,9 @@ abstract Agenda<E>(AgendaDef<E>) from AgendaDef<E> to AgendaDef<E>{
 	public function new(self) this = self;
 	static public function lift<E>(self:AgendaDef<E>):Agenda<E> return new Agenda(self);
 	
+	@:noUsing static public function unit<E>():Agenda<E>{
+		return Halt(Terminated(Stop));
+	}
 
 	@:from static public function fromJob<R,E>(job:Job<R,E>):Agenda<E>{
 		var last = null;
