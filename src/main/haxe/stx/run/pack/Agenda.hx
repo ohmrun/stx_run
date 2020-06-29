@@ -34,7 +34,7 @@ abstract Agenda<E>(AgendaDef<E>) from AgendaDef<E> to AgendaDef<E>{
 		return rec(job);
 	}
 	@:from static public function fromFutureAgenda<E>(ft:Future<Agenda<E>>):Agenda<E>{
-    return lift(__.hold(()-> ft.map(__.upcast)));
+    return lift(__.hold(Guard(() -> ft.map(__.upcast).map((x) -> Ready(()->x)))));
   }
 	public function submit(scheduler){
 		var eff : Effect<E> = Coroutine._.map_r(
@@ -53,7 +53,7 @@ abstract Agenda<E>(AgendaDef<E>) from AgendaDef<E> to AgendaDef<E>{
 			}
 		);
 	}
-	public function crunch(scheduler){
+	public inline function crunch(scheduler){
 		var eff : Effect<E> = Coroutine._.map_r(
 			Coroutine._.map(this,_ -> Noise),
 			_ -> Noise
@@ -106,21 +106,24 @@ class AgendaLift{
 		}
 		return rec(self,that);
 	}
-	static public function seq<E>(self:Agenda<E>,that:Agenda<E>):Agenda<E>{
+	static public inline function seq<E>(self:Agenda<E>,that:Agenda<E>):Agenda<E>{
 		return lift(Coroutine._.flat_map_r(
 			self,
-			(statI) -> Coroutine._.map_r(
+			(statI:Stat) -> Coroutine._.map_r(
 				that,
-				(statII) -> 
+				(statII:Stat) -> 
 					__.option(statI)
 						.flat_map(
-							v0 -> __.option(statII)
-								.map( v1 -> v0.add(v1))
+							(v0:Stat) -> __.option(statII)
+								.map( (v1:Stat) -> v0.add(v1))
 						).defv(Stat.unit())
 			)
 		));
 	}
 	static public function escape<E>(self:Agenda<E>):Agenda<E>{
 		return lift(Coroutine._.escape(self));
+	}
+	static public inline function errata<E,EE>(self:Agenda<E>,fn:Err<E>->Err<EE>):Agenda<EE>{
+		return lift(Coroutine._.errata(self,fn));
 	}
 }

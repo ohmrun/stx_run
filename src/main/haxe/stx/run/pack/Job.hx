@@ -34,16 +34,16 @@ abstract Job<R,E>(JobDef<R,E>) from JobDef<R,E> to JobDef<R,E>{
 		var stat = Stat.unit();
 		return lift(
 			__.hold(
-				() -> {
+				Guard(() -> {
 					stat.enter();
 					return future.map(
 					res -> {
 							stat.leave();
-							return __.emit(stat,__.upcast(issue(res)));
+							return Ready(()->__.emit(stat,__.upcast(issue(res))));
 						}
 					);
 				}
-			)
+			))
 		);
 	}
 	@:noUsing static public function value<R,E>(r:R):Job<R,E>{
